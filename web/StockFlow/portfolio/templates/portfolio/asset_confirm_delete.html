@@ -1,19 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Asset</title>
-</head>
-<body>
-    <h1>Delete Asset</h1>
+{% extends "portfolio/base.html" %}
 
-    <p>Are you sure you want to delete "{{ asset.name }}"?</p>
+{% block title %}Delete Asset{% endblock %}
+
+{% block content %}
+<div class="card p-4 shadow-sm bg-white">
+    <h2 class="mb-3">Delete Asset</h2>
+
+    <p>Are you sure you want to delete <strong>{{ asset.name }}</strong>?</p>
 
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Yes, delete</button>
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a href="{% url 'asset_list' %}" class="btn btn-secondary">Cancel</a>
     </form>
-
-    <p><a href="{% url 'asset_list' %}">Cancel</a></p>
-</body>
-</html>
+</div>
+{% endblock %}
 

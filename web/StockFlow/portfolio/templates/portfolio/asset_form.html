@@ -1,22 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Asset</title>
-</head>
-<body>
-    <h1>Create Asset</h1>
-   
-    <!-- show form -->
-    <form method="post">
-	<!-- Embedding a "security token -->
-	{% csrf_token %}
-	<!-- The AssetForm created in Python is displayed as HTML. -->
-	<!-- .as_p is a convenient method that displays each form field within a <p> tag. -->
-	{{ form.as_p }}
+{% extends "portfolio/base.html" %}
 
-	<button type="submit">Save</button>
-    </form>
+{% block title %}Asset Form{% endblock %}
 
-    <p><a href="{% url 'asset_list' %}">Back to list</a></p>
-</body>
-</html>
+{% block content %}
+<h1 class="mb-4">Asset Form</h1>
+
+<form method="post" class="card p-4 shadow-sm bg-white">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary mt-3">Save</button>
+    <a href="{% url 'asset_list' %}" class="btn btn-secondary mt-3">Back</a>
+</form>
+{% endblock %}
