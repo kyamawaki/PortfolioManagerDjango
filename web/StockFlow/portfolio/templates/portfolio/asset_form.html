@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Asset</title>
+</head>
+<body>
+    <h1>Create Asset</h1>
+   
+    <!-- show form -->
+    <form method="post">
+	<!-- Embedding a "security token -->
+	{% csrf_token %}
+	<!-- The AssetForm created in Python is displayed as HTML. -->
+	<!-- .as_p is a convenient method that displays each form field within a <p> tag. -->
+	{{ form.as_p }}
+
+	<button type="submit">Save</button>
+    </form>
+
+    <p><a href="{% url 'asset_list' %}">Back to list</a></p>
+</body>
+</html>
