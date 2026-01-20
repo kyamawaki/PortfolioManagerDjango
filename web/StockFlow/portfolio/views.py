@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Asset
+from .models import Asset, Transaction, Price
 from .forms import AssetForm
+# import aggregation tools
+from django.db.models import Sum, F
 
 # Create your views here.
 def asset_list(request):
@@ -40,7 +42,7 @@ def asset_edit(request, pk):
             return redirect("asset_list")
     else:
         form = AssetForm(instance=asset)
-    
+
     # show html with form
     return render(request, "portfolio/asset_form.html", {"form": form})
 
@@ -52,4 +54,52 @@ def asset_delete(request, pk):
         return redirect("asset_list")
 
     return render(request, "portfolio/asset_confirm_delete.html", {"asset": asset})
+
+
+#################################
+# list portfolio
+#################################
+def portfolio_list(request):
+    # collect transaction's simbol (distinct eliminates duplicates)
+    symbols = Transaction.objects.values_list('symbol', flat=True).distinct()
+    portfolios = []
+
+    for symbol in symbols:
+        # Take out buy and sell transactions
+        buys = Transaction.objects.filter(symbol=symbol, type='BUY')
+        sells = Transaction.objects.filter(symbol=symbol, type='SELL')
+
+        # Calculate the total amount of buys and purchase amount
+        # you can write scripts below
+        # result = buys.aggregate(sum_val=Sum('quantity'))
+        # total_by_qty = result['sum_val'] (eg. result={'sum_val', 100})
+        total_buy_qty = buys.aggregate(total=Sum('quantity'))['total'] or 0
+        # F() refers directly to the databes fields
+        total_buy_cost = buys.aggregate(total=Sum('quantity') * F('price'))['total'] or 0
+        total_sell_qty = sells.aggregate(total=Sum('quantity'))['total'] or 0
+        current_qty = total_buy_qty - total_sell_qty
+
+        average_buy_price = total_buy_cost / total_buy_qty if total_buy_qty > 0 else 0
+
+        # latest price
+        latest_price = Price.objects.filter(symbol=symbol).order_by('-date').first()
+        current_price = latest_price.close if latest_price else None
+
+        # profit
+        profit_loss = None
+        if current_price is not None:
+            profit_loss = (current_price - average_buy_price) * current_qty
+
+        portfolios.append({
+            'symbol': symbol,
+            'average_buy_price': average_buy_price,
+            'current_price': current_price,
+            'current_qty': current_qty,
+            'profit_loss': profit_loss,
+            })
+
+        # send portfolios to html
+        return render(request, 'portfolio/portfolio_list.html', {'portfolios': portfolios})
+
+
 
