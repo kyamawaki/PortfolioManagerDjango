@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Holdings</title>
+</head>
+<body>
+    <h1>Holding</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>名前</th><th>Ticker</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額（円）</th><th>損益（円）</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in holdings %}
+        <tr>
+          <td>{{ h.name }}</td>
+          <td>{{ h.ticker }}</td>
+          <td>{{ h.quantity }}</td>
+          <td>{{ h.average_price }}</td>
+          <td>{{ h.current_price }}</td>
+          <td>{{ h.valuation_jpy|floatformat:0 }} 円</td>
+          <td>{{ h.profit_jpy|floatformat:0 }} 円</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+</body>
+</html>
+

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Asset, Transaction, Price
+from .models import Asset, Transaction, Price, Holding
 from .forms import AssetForm
 # import aggregation tools
 from django.db.models import Sum, F
@@ -61,11 +61,13 @@ def asset_delete(request, pk):
 #################################
 def portfolio_list(request):
     # collect transaction's simbol (distinct eliminates duplicates)
+    # SQL statement : SELECT DISTINCT symbol FROM transactions;
     symbols = Transaction.objects.values_list('symbol', flat=True).distinct()
     portfolios = []
 
     for symbol in symbols:
         # Take out buy and sell transactions
+        # SQL statemnet: SELECT symbol FROM transactions WHERE symbol='ticker' AND type='BUY';
         buys = Transaction.objects.filter(symbol=symbol, type='BUY')
         sells = Transaction.objects.filter(symbol=symbol, type='SELL')
 
@@ -101,5 +103,12 @@ def portfolio_list(request):
         # send portfolios to html
         return render(request, 'portfolio/portfolio_list.html', {'portfolios': portfolios})
 
+
+#################################
+# list holdings
+#################################
+def holding_list(request):
+    holdings = Holding.objects.all()
+    return render(request, 'portfolio/holding_list.html', {'holdings': holdings})
 
 
