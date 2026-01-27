@@ -114,7 +114,7 @@ def holding_list(request):
 #################################
 # Add holding
 #################################
-def add_holding(request):
+def holding_create(request):
     if request.method == 'POST':
         form = HoldingForm(request.POST)
         if form.is_valid():
@@ -123,7 +123,7 @@ def add_holding(request):
     else:
         form = HoldingForm()
 
-    return render(request, 'portfolio/add_holding.html', {'form': form})
+    return render(request, 'portfolio/holding_create.html', {'form': form})
 
 #################################
 # Edit holding
