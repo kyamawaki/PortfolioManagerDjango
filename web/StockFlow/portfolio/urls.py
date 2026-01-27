@@ -9,5 +9,6 @@ urlpatterns = [
     path("assets/<int:pk>/delete/", views.asset_delete, name="asset_delete"),
     #path("portfolio/", views.portfolio_list, name="portfolio_list"),
     path("portfolio/holdings", views.holding_list, name="holdings_list"),
+    path("portfolio/add", views.add_holding, name="add_holding"),
 ]
 

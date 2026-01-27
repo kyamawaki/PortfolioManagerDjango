@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Asset, Transaction, Price, Holding
-from .forms import AssetForm
+from .forms import AssetForm, HoldingForm
 # import aggregation tools
 from django.db.models import Sum, F
 
@@ -111,4 +111,17 @@ def holding_list(request):
     holdings = Holding.objects.all()
     return render(request, 'portfolio/holding_list.html', {'holdings': holdings})
 
+#################################
+# Add holding
+#################################
+def add_holding(request):
+    if request.method == 'POST':
+        form = HoldingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('holdings_list')
+    else:
+        form = HoldingForm()
+
+    return render(request, 'portfolio/add_holding.html', {'form': form})
 
