@@ -25,6 +25,12 @@
           <td>{{ h.current_price }}</td>
           <td>{{ h.valuation_jpy|floatformat:0 }} 円</td>
           <td>{{ h.profit_jpy|floatformat:0 }} 円</td>
+          <td>
+              <a href="{% url 'holding_edit' h.pk %}">編集</a>
+              <form action="{% url 'holding_delete' h.pk %}" method="post" style="display:include;">
+                  {% csrf_token %}
+                  <button type="submit" onclick="return confirm('削除しますか？');">削除</button>
+              </form>
         </tr>
         {% endfor %}
       </tbody>

@@ -119,9 +119,33 @@ def add_holding(request):
         form = HoldingForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('holdings_list')
+            return redirect('holding_list')
     else:
         form = HoldingForm()
 
     return render(request, 'portfolio/add_holding.html', {'form': form})
+
+#################################
+# Edit holding
+#################################
+def holding_edit(request, pk):
+    holding = get_object_or_404(Holding, pk=pk)
+
+    if request.method == 'POST':
+        form = HoldingForm(request.POST, instance=holding)
+        if form.is_valid():
+            form.save()
+            return redirect('holding_list')
+    else:
+        form = HoldingForm(instance=holding)
+
+    return render(request, 'portfolio/holding_edit.html', {'form': form, 'holding': holding})
+
+#################################
+# Delete holding
+#################################
+def holding_delete(request, pk):
+    holding = get_object_or_404(Holding, pk=pk)
+    holding.delete()
+    return redirect('holding_list')
 
