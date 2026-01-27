@@ -1,0 +1,10 @@
+<h2>新規追加</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">追加</button>
+</form>
+
+<a href="{% url 'holding_list' %}">戻る</a>
+

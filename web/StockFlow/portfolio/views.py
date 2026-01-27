@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Asset, Transaction, Price
-from .forms import AssetForm
+from .models import Asset, Transaction, Price, Holding
+from .forms import AssetForm, HoldingForm
 # import aggregation tools
 from django.db.models import Sum, F
 
@@ -61,11 +61,13 @@ def asset_delete(request, pk):
 #################################
 def portfolio_list(request):
     # collect transaction's simbol (distinct eliminates duplicates)
+    # SQL statement : SELECT DISTINCT symbol FROM transactions;
     symbols = Transaction.objects.values_list('symbol', flat=True).distinct()
     portfolios = []
 
     for symbol in symbols:
         # Take out buy and sell transactions
+        # SQL statemnet: SELECT symbol FROM transactions WHERE symbol='ticker' AND type='BUY';
         buys = Transaction.objects.filter(symbol=symbol, type='BUY')
         sells = Transaction.objects.filter(symbol=symbol, type='SELL')
 
@@ -102,4 +104,48 @@ def portfolio_list(request):
         return render(request, 'portfolio/portfolio_list.html', {'portfolios': portfolios})
 
 
+#################################
+# list holdings
+#################################
+def holding_list(request):
+    holdings = Holding.objects.all()
+    return render(request, 'portfolio/holding_list.html', {'holdings': holdings})
+
+#################################
+# Add holding
+#################################
+def holding_create(request):
+    if request.method == 'POST':
+        form = HoldingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('holding_list')
+    else:
+        form = HoldingForm()
+
+    return render(request, 'portfolio/holding_create.html', {'form': form})
+
+#################################
+# Edit holding
+#################################
+def holding_edit(request, pk):
+    holding = get_object_or_404(Holding, pk=pk)
+
+    if request.method == 'POST':
+        form = HoldingForm(request.POST, instance=holding)
+        if form.is_valid():
+            form.save()
+            return redirect('holding_list')
+    else:
+        form = HoldingForm(instance=holding)
+
+    return render(request, 'portfolio/holding_edit.html', {'form': form, 'holding': holding})
+
+#################################
+# Delete holding
+#################################
+def holding_delete(request, pk):
+    holding = get_object_or_404(Holding, pk=pk)
+    holding.delete()
+    return redirect('holding_list')
 

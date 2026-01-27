@@ -1,0 +1,11 @@
+<!-- edit_holding.html -->
+<h2>{{ holding.name }} を編集</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">更新</button>
+</form>
+
+<a href="{% url 'holding_list' %}">戻る</a>
+
