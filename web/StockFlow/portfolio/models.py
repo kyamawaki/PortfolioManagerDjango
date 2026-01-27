@@ -47,7 +47,7 @@ class Price(models.Model):
 from django.db import models
 
 class Holding(models.Model):
-    name = models.CharField("名前", max_length=100)
+    name = models.CharField("名前", max_length=100, unique=True)
     ticker = models.CharField("Ticker", max_length=10)
     quantity = models.PositiveIntegerField("数量")
     average_price = models.DecimalField("平均買値（ドル）", max_digits=10, decimal_places=2)
