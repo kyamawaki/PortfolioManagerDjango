@@ -1,13 +1,26 @@
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, F
 from .models import Holding
 from .forms import HoldingForm
+from .services import fetch_latest_price, fetch_usd_jpy
 
 #################################
 # list holdings
 #################################
 def holding_list(request):
     holdings = Holding.objects.all()
+
+    usd_jpy = fetch_usd_jpy()
+    for h in holdings:
+        # float to decimal
+        h.exchange_rate = Decimal(str(usd_jpy))
+        price = fetch_latest_price(h.ticker)
+        # float to decimal
+        h.current_price = Decimal(str(price))
+
+        h.save()
+
     return render(request, 'portfolio/holding_list.html', {'holdings': holdings})
 
 #################################
