@@ -4,6 +4,8 @@
     <title>Holdings</title>
 </head>
 <body>
+    {% load humanize %}
+
     <h1>Holding</h1>
 
     <!-- 'urlpatterns[]の"holding_create"からurlを逆引きする -->
@@ -24,11 +26,11 @@
         <tr>
           <td>{{ h.name }}</td>
           <td>{{ h.ticker }}</td>
-          <td>{{ h.quantity }}</td>
-          <td>{{ h.average_price }}</td>
-          <td>{{ h.current_price }}</td>
-          <td>{{ h.valuation_jpy|floatformat:0 }} 円</td>
-          <td>{{ h.profit_jpy|floatformat:0 }} 円</td>
+          <td>{{ h.quantity|intcomma }}</td>
+          <td>{{ h.average_price|intcomma}}</td>
+          <td>{{ h.current_price|intcomma}}</td>
+          <td>{{ h.valuation_jpy|floatformat:0|intcomma }} 円</td>
+          <td>{{ h.profit_jpy|floatformat:0|intcomma}} 円</td>
           <td>
               <a href="{% url 'holding_edit' h.pk %}">編集</a>
               <form action="{% url 'holding_delete' h.pk %}" method="post" style="display:include;">
