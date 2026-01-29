@@ -10,7 +10,7 @@
     <a href="{% url 'holding_create' %}">新規追加</a>
 
     {% if last_updated %}
-        <p>最終更新日: {{ last_updated }}</p>
+        <p>最終更新日: {{ last_updated|date:"Y-m-d" }}</p>
     {% endif %}
 
     <table>
