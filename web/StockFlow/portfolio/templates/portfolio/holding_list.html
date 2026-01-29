@@ -4,13 +4,15 @@
     <title>Holdings</title>
 </head>
 <body>
+    {% load humanize %}
+
     <h1>Holding</h1>
 
     <!-- 'urlpatterns[]の"holding_create"からurlを逆引きする -->
     <a href="{% url 'holding_create' %}">新規追加</a>
 
     {% if last_updated %}
-        <p>最終更新日: {{ last_updated }}</p>
+        <p>最終更新日: {{ last_updated|date:"Y-m-d" }}</p>
     {% endif %}
 
     <table>
@@ -24,22 +26,31 @@
         <tr>
           <td>{{ h.name }}</td>
           <td>{{ h.ticker }}</td>
-          <td>{{ h.quantity }}</td>
-          <td>{{ h.average_price }}</td>
-          <td>{{ h.current_price }}</td>
-          <td>{{ h.valuation_jpy|floatformat:0 }} 円</td>
-          <td>{{ h.profit_jpy|floatformat:0 }} 円</td>
+          <td>{{ h.quantity|intcomma }}</td>
+          <td>{{ h.average_price|intcomma}}</td>
+          <td>{{ h.current_price|intcomma}}</td>
+          <td>{{ h.valuation_jpy|floatformat:0|intcomma }} 円</td>
+          <td>{{ h.profit_jpy|floatformat:0|intcomma}} 円</td>
           <td>
-              <a href="{% url 'holding_edit' h.pk %}">編集</a>
-              <form action="{% url 'holding_delete' h.pk %}" method="post" style="display:include;">
-                  {% csrf_token %}
-                  <button type="submit" onclick="return confirm('削除しますか？');">削除</button>
-              </form>
+            <a href="{% url 'holding_edit' h.pk %}">編集</a>
+            <a href="#" onclick="deleteHolding({{ h.pk }}); return false;">削除</a>
+            <form id="delete-form-{{ h.pk }}" action="{% url 'holding_delete' h.pk %}" method="post" style="display:none;">
+               {% csrf_token %}
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
+    <script>
+        function deleteHolding(id) {
+            if (confirm("削除しますか?")) {
+                document.getElementById(`delete-form-${id}`).submit();
+            }
+        }
+    </script>
 </body>
+
 </html>
 
