@@ -32,16 +32,25 @@
           <td>{{ h.valuation_jpy|floatformat:0|intcomma }} 円</td>
           <td>{{ h.profit_jpy|floatformat:0|intcomma}} 円</td>
           <td>
-              <a href="{% url 'holding_edit' h.pk %}">編集</a>
-              <form action="{% url 'holding_delete' h.pk %}" method="post" style="display:include;">
-                  {% csrf_token %}
-                  <button type="submit" onclick="return confirm('削除しますか？');">削除</button>
-              </form>
+            <a href="{% url 'holding_edit' h.pk %}">編集</a>
+            <a href="#" onclick="deleteHolding({{ h.pk }}); return false;">削除</a>
+            <form id="delete-form-{{ h.pk }}" action="{% url 'holding_delete' h.pk %}" method="post" style="display:none;">
+               {% csrf_token %}
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
+    <script>
+        function deleteHolding(id) {
+            if (confirm("削除しますか?")) {
+                document.getElementById(`delete-form-${id}`).submit();
+            }
+        }
+    </script>
 </body>
+
 </html>
 
