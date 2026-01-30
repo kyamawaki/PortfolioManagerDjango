@@ -27,8 +27,8 @@
           <td>{{ h.name }}</td>
           <td>{{ h.ticker }}</td>
           <td>{{ h.quantity|intcomma }}</td>
-          <td>{{ h.average_price|intcomma}}</td>
-          <td>{{ h.current_price|intcomma}}</td>
+          <td>{{ h.average_price|floatformat:2|intcomma}}</td>
+          <td>{{ h.current_price|floatformat:2|intcomma}}</td>
           <td>{{ h.valuation_jpy|floatformat:0|intcomma }} 円</td>
           <td>{{ h.profit_jpy|floatformat:0|intcomma}} 円</td>
           <td>
