@@ -50,7 +50,7 @@
     <table>
       <thead>
         <tr>
-          <th>名前</th><th>Ticker</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額（円）</th><th>損益（円）</th>
+          <th>名前</th><th>Ticker</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額</th><th>損益</th>
         </tr>
       </thead>
       <tbody>
@@ -61,12 +61,12 @@
           <td>{{ h.quantity|intcomma }}</td>
           <td>{{ h.average_price|floatformat:2|intcomma}}</td>
           <td>{{ h.current_price|floatformat:2|intcomma}}</td>
-          <td>{{ h.valuation_jpy|floatformat:0|intcomma }} 円</td>
+          <td>(USD) {{ h.valuation|floatformat:0|intcomma }}<br>(JPY) {{ h.valuation_jpy|floatformat:0|intcomma }}</td>
           <td>
               {% if h.profit_jpy >= 0 %}
-                  <span style="color:green;">{{ h.profit_jpy|floatformat:0|intcomma}} 円</span>
+                  <span style="color:green;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
               {% else %}
-                  <span style="color:red;">{{ h.profit_jpy|floatformat:0|intcomma}} 円</span>
+                  <span style="color:red;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
               {% endif %}
           </td>
           <td>
