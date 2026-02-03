@@ -79,6 +79,20 @@
         </tr>
         {% endfor %}
       </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="5">合計</th>
+          <th>(USD) {{ total_valuation|floatformat:0|intcomma }}<br>
+              (JPY) {{ total_valuation_jpy|floatformat:0|intcomma }}</th>
+          <th>
+            {% if total_profit >= 0 %}
+                <span style="color:green;">(USD ){{ total_profit|floatformat:0|intcomma }}<br>(JPY) {{ total_profit_jpy|floatformat:0|intcomma }}</span>
+            {% else %}
+                <span style="color:red;">{{ total_profit|floatformat:0|intcomma }}<br>(JPY) {{ total_profit_jpy|floatformat:0|intcomma }}</span><br>
+            {% endif %}
+          </th>
+        </tr>
+      </tfoot>
     </table>
 
     <script>

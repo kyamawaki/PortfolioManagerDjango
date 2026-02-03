@@ -28,7 +28,18 @@ def holding_list(request):
 
     last_updated = holdings.first().last_updated if holdings else None
 
-    return render(request, 'portfolio/holding_list.html', {'holdings': holdings, 'last_updated': last_updated})
+    total_valuation = sum(h.valuation or 0 for h in holdings)
+    total_valuation_jpy = sum(h.valuation_jpy or 0 for h in holdings)
+    total_profit = sum(h.profit or 0 for h in holdings)
+    total_profit_jpy = sum(h.profit_jpy or 0 for h in holdings)
+
+    return render(request, 'portfolio/holding_list.html', {'holdings': holdings,
+                                                           'last_updated': last_updated,
+                                                           'total_valuation': total_valuation,
+                                                           'total_valuation_jpy': total_valuation_jpy,
+                                                           'total_profit': total_profit,
+                                                           'total_profit_jpy': total_profit_jpy,
+                  })
 
 #################################
 # Add holding
