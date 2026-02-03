@@ -10,6 +10,8 @@
 
     <!-- 'urlpatterns[]の"holding_create"からurlを逆引きする -->
     <a href="{% url 'holding_create' %}">新規追加</a>
+    |
+    <a href="{% url 'holding_update' %}">即時更新</a>
 
     {% if last_updated %}
         <p>最終更新日: {{ last_updated|date:"Y-m-d" }}</p>
