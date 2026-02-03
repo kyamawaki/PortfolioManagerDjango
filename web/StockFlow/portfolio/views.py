@@ -68,3 +68,22 @@ def holding_delete(request, pk):
     holding.delete()
     return redirect('holding_list')
 
+#################################
+# Update holding
+#################################
+def holding_update(request):
+    usd_jpy = fetch_usd_jpy()
+    if usd_jpy is None:
+        return None
+
+    today = date.today()
+    holdings = Holding.objects.all()
+    for h in holdings:
+        price = fetch_latest_price(h.ticker)
+        if price:
+            h.current_price = Decimal(str(price))
+            h.exchange_rate = Decimal(str(usd_jpy))
+            h.last_updated = today
+            h.save()
+
+    return redirect('holding_list')
