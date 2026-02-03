@@ -30,7 +30,13 @@
           <td>{{ h.average_price|floatformat:2|intcomma}}</td>
           <td>{{ h.current_price|floatformat:2|intcomma}}</td>
           <td>{{ h.valuation_jpy|floatformat:0|intcomma }} 円</td>
-          <td>{{ h.profit_jpy|floatformat:0|intcomma}} 円</td>
+          <td>
+              {% if h.profit_jpy >= 0 %}
+                  <span style="color:green;">{{ h.profit_jpy|floatformat:0|intcomma}} 円</span>
+              {% else %}
+                  <span style="color:red;">{{ h.profit_jpy|floatformat:0|intcomma}} 円</span>
+              {% endif %}
+          </td>
           <td>
             <a href="{% url 'holding_edit' h.pk %}">編集</a>
             <a href="#" onclick="deleteHolding({{ h.pk }}); return false;">削除</a>
