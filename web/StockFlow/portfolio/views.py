@@ -16,19 +16,37 @@ def holding_list(request):
     needs_update = any(h.last_updated != today for h in holdings)
     if needs_update:
         usd_jpy = fetch_usd_jpy()
+        if usd_jpy is None:
+            usd_jpy = 0.0
+
         for h in holdings:
             # float to decimal
             h.exchange_rate = Decimal(str(usd_jpy))
             price = fetch_latest_price(h.ticker)
-            # float to decimal
-            h.current_price = Decimal(str(price))
+            if price:
+                # float to decimal
+                h.current_price = Decimal(str(price))
 
             h.last_updated = today
             h.save()
 
     last_updated = holdings.first().last_updated if holdings else None
 
-    return render(request, 'portfolio/holding_list.html', {'holdings': holdings, 'last_updated': last_updated})
+    total_valuation = sum(h.valuation or 0 for h in holdings)
+    total_valuation_jpy = sum(h.valuation_jpy or 0 for h in holdings)
+    total_profit = sum(h.profit or 0 for h in holdings)
+    total_profit_jpy = sum(h.profit_jpy or 0 for h in holdings)
+
+    exchange_rate = holdings[0].exchange_rate if holdings else None
+
+    return render(request, 'portfolio/holding_list.html', {'holdings': holdings,
+                                                           'last_updated': last_updated,
+                                                           'total_valuation': total_valuation,
+                                                           'total_valuation_jpy': total_valuation_jpy,
+                                                           'total_profit': total_profit,
+                                                           'total_profit_jpy': total_profit_jpy,
+                                                           'exchange_rate': exchange_rate,
+                  })
 
 #################################
 # Add holding

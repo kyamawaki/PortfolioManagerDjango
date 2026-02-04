@@ -47,10 +47,17 @@
         <p>最終更新日: {{ last_updated|date:"Y-m-d" }}</p>
     {% endif %}
 
+    
+    {% if exchange_rate %}
+        <span>USD_JPY: {{ exchagne_rate }}<span>
+    {% else %}
+        <span>USD_JPY: Couldn't retrive! <span>
+    {% endif %}
+    
     <table>
       <thead>
         <tr>
-          <th>名前</th><th>Ticker</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額（円）</th><th>損益（円）</th>
+          <th>名前</th><th>Ticker</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額</th><th>損益</th>
         </tr>
       </thead>
       <tbody>
@@ -61,12 +68,12 @@
           <td>{{ h.quantity|intcomma }}</td>
           <td>{{ h.average_price|floatformat:2|intcomma}}</td>
           <td>{{ h.current_price|floatformat:2|intcomma}}</td>
-          <td>{{ h.valuation_jpy|floatformat:0|intcomma }} 円</td>
+          <td>(USD) {{ h.valuation|floatformat:0|intcomma }}<br>(JPY) {{ h.valuation_jpy|floatformat:0|intcomma }}</td>
           <td>
               {% if h.profit_jpy >= 0 %}
-                  <span style="color:green;">{{ h.profit_jpy|floatformat:0|intcomma}} 円</span>
+                  <span style="color:green;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
               {% else %}
-                  <span style="color:red;">{{ h.profit_jpy|floatformat:0|intcomma}} 円</span>
+                  <span style="color:red;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
               {% endif %}
           </td>
           <td>
@@ -79,6 +86,20 @@
         </tr>
         {% endfor %}
       </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="5">合計</th>
+          <th>(USD) {{ total_valuation|floatformat:0|intcomma }}<br>
+              (JPY) {{ total_valuation_jpy|floatformat:0|intcomma }}</th>
+          <th>
+            {% if total_profit >= 0 %}
+                <span style="color:green;">(USD ){{ total_profit|floatformat:0|intcomma }}<br>(JPY) {{ total_profit_jpy|floatformat:0|intcomma }}</span>
+            {% else %}
+                <span style="color:red;">{{ total_profit|floatformat:0|intcomma }}<br>(JPY) {{ total_profit_jpy|floatformat:0|intcomma }}</span><br>
+            {% endif %}
+          </th>
+        </tr>
+      </tfoot>
     </table>
 
     <script>
