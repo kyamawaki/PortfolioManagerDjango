@@ -70,7 +70,7 @@
           <td>{{ h.current_price|floatformat:2|intcomma}}</td>
           <td>(USD) {{ h.valuation|floatformat:0|intcomma }}<br>(JPY) {{ h.valuation_jpy|floatformat:0|intcomma }}</td>
           <td>
-              {% if h.profit_jpy >= 0 %}
+              {% if h.profit >= 0 %}
                   <span style="color:green;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
               {% else %}
                   <span style="color:red;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
