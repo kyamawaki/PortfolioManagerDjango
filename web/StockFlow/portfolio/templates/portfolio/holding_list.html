@@ -47,6 +47,13 @@
         <p>最終更新日: {{ last_updated|date:"Y-m-d" }}</p>
     {% endif %}
 
+    
+    {% if exchange_rate %}
+        <span>USD_JPY: {{ exchagne_rate }}<span>
+    {% else %}
+        <span>USD_JPY: Couldn't retrive! <span>
+    {% endif %}
+    
     <table>
       <thead>
         <tr>
