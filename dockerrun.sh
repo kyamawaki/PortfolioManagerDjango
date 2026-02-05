@@ -7,6 +7,7 @@
  
 # run docker container
 docker run -d --name django \
+  --env-file .env \
   --mount type=bind,source=$(pwd)/web,target=/app/ \
   -p 3000:8000 \
   django sleep infinity
