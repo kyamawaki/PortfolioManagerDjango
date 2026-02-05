@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 
 ################################################
 # Holding Model
@@ -35,6 +36,14 @@ class Holding(models.Model):
     @property
     def profit_jpy(self):
         return self.profit * self.exchange_rate
+
+    # 資産に対する割合
+    @property
+    def ratio(self):
+        from .models import Holding
+        total = sum(h.valuation_jpy for h in Holding.objects.all())
+        ratio_value = self.valuation_jpy / total * 100 if total > 0 else 0
+        return (Decimal)(ratio_value)
 
     def __str__(self):
         return f"{self.name} ({self.ticker})"
