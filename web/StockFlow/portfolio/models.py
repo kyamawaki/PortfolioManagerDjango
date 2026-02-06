@@ -41,7 +41,7 @@ class Asset(models.Model):
     @property
     def ratio(self):
         from .models import Asset
-        total = sum(h.valuation_jpy for h in Asset.objects.all())
+        total = sum(asset.valuation_jpy for asset in Asset.objects.all())
         ratio_value = self.valuation_jpy / total * 100 if total > 0 else 0
         return (Decimal)(ratio_value)
 

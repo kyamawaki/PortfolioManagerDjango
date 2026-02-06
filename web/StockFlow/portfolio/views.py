@@ -13,29 +13,29 @@ def asset_list(request):
     assets = Asset.objects.all()
 
     today = date.today()
-    needs_update = any(h.last_updated != today for h in assets)
+    needs_update = any(asset.last_updated != today for asset in assets)
     if needs_update:
         usd_jpy = fetch_usd_jpy()
         if usd_jpy is None:
             usd_jpy = 0.0
 
-        for h in assets:
+        for asset in assets:
             # float to decimal
-            h.exchange_rate = Decimal(str(usd_jpy))
-            price = fetch_latest_price(h.ticker)
+            asset.exchange_rate = Decimal(str(usd_jpy))
+            price = fetch_latest_price(asset.ticker)
             if price:
                 # float to decimal
-                h.current_price = Decimal(str(price))
+                asset.current_price = Decimal(str(price))
 
-            h.last_updated = today
-            h.save()
+            asset.last_updated = today
+            asset.save()
 
     last_updated = assets.first().last_updated if assets else None
 
-    total_valuation = sum(h.valuation or 0 for h in assets)
-    total_valuation_jpy = sum(h.valuation_jpy or 0 for h in assets)
-    total_profit = sum(h.profit or 0 for h in assets)
-    total_profit_jpy = sum(h.profit_jpy or 0 for h in assets)
+    total_valuation = sum(asset.valuation or 0 for asset in assets)
+    total_valuation_jpy = sum(asset.valuation_jpy or 0 for asset in assets)
+    total_profit = sum(asset.profit or 0 for asset in assets)
+    total_profit_jpy = sum(asset.profit_jpy or 0 for asset in assets)
 
     exchange_rate = assets[0].exchange_rate if assets else None
 
@@ -96,12 +96,12 @@ def asset_update(request):
 
     today = date.today()
     assets = Asset.objects.all()
-    for h in assets:
-        price = fetch_latest_price(h.ticker)
+    for asset in assets:
+        price = fetch_latest_price(asset.ticker)
         if price:
-            h.current_price = Decimal(str(price))
-            h.exchange_rate = Decimal(str(usd_jpy))
-            h.last_updated = today
-            h.save()
+            asset.current_price = Decimal(str(price))
+            asset.exchange_rate = Decimal(str(usd_jpy))
+            asset.last_updated = today
+            asset.save()
 
     return redirect('asset_list')

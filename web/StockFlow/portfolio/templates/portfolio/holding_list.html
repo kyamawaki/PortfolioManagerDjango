@@ -66,26 +66,26 @@
           </tr>
         </thead>
         <tbody>
-          {% for h in assets %}
+          {% for asset in assets %}
           <tr>
-            <td>{{ h.name }}</td>
-            <td>{{ h.ticker }}</td>
-            <td>{{ h.quantity|intcomma }}</td>
-            <td>{{ h.average_price|floatformat:2|intcomma}}</td>
-            <td>{{ h.current_price|floatformat:2|intcomma}}</td>
-            <td>(USD) {{ h.valuation|floatformat:0|intcomma }}<br>(JPY) {{ h.valuation_jpy|floatformat:0|intcomma }}</td>
+            <td>{{ asset.name }}</td>
+            <td>{{ asset.ticker }}</td>
+            <td>{{ asset.quantity|intcomma }}</td>
+            <td>{{ asset.average_price|floatformat:2|intcomma}}</td>
+            <td>{{ asset.current_price|floatformat:2|intcomma}}</td>
+            <td>(USD) {{ asset.valuation|floatformat:0|intcomma }}<br>(JPY) {{ asset.valuation_jpy|floatformat:0|intcomma }}</td>
             <td>
-                {% if h.profit >= 0 %}
-                    <span style="color:green;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
+                {% if asset.profit >= 0 %}
+                    <span style="color:green;">(USD) {{ asset.profit|floatformat:0|intcomma}}<br>(JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}</span>
                 {% else %}
-                    <span style="color:red;">(USD) {{ h.profit|floatformat:0|intcomma}}<br>(JPY) {{ h.profit_jpy|floatformat:0|intcomma}}</span>
+                    <span style="color:red;">(USD) {{ asset.profit|floatformat:0|intcomma}}<br>(JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}</span>
                 {% endif %}
             </td>
-            <td>{{ h.ratio|floatformat:2}}</td>
+            <td>{{ asset.ratio|floatformat:2}}</td>
             <td>
-              <a href="{% url 'asset_edit' h.pk %}">編集</a>
-              <a href="#" onclick="deleteAsset({{ h.pk }}); return false;">削除</a>
-              <form id="delete-form-{{ h.pk }}" action="{% url 'asset_delete' h.pk %}" method="post" style="display:none;">
+              <a href="{% url 'asset_edit' asset.pk %}">編集</a>
+              <a href="#" onclick="deleteAsset({{ asset.pk }}); return false;">削除</a>
+              <form id="delete-form-{{ asset.pk }}" action="{% url 'asset_delete' asset.pk %}" method="post" style="display:none;">
                  {% csrf_token %}
               </form>
             </td>
