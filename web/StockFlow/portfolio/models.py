@@ -2,9 +2,9 @@ from django.db import models
 from decimal import Decimal
 
 ################################################
-# Holding Model
+# Asset Model
 ################################################
-class Holding(models.Model):
+class Asset(models.Model):
     name = models.CharField("名前", max_length=100, unique=True)
     ticker = models.CharField("Ticker", max_length=10)
     quantity = models.PositiveIntegerField("数量")
@@ -40,8 +40,8 @@ class Holding(models.Model):
     # 資産に対する割合
     @property
     def ratio(self):
-        from .models import Holding
-        total = sum(h.valuation_jpy for h in Holding.objects.all())
+        from .models import Asset
+        total = sum(h.valuation_jpy for h in Asset.objects.all())
         ratio_value = self.valuation_jpy / total * 100 if total > 0 else 0
         return (Decimal)(ratio_value)
 

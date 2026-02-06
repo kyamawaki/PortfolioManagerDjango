@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Holding
+from .models import Asset
 from .services import fetch_latest_price
 
 #################################################################
-@admin.register(Holding)
-class HoldingAdmin(admin.ModelAdmin):
+@admin.register(Asset)
+class AssetAdmin(admin.ModelAdmin):
     list_display = ('name', 'ticker', 'quantity', 'average_price', 'current_price', 'valuation_display', 'profit_display')
     search_fields = ('name', 'ticker')
     actions = ['update_prices']
@@ -19,11 +19,11 @@ class HoldingAdmin(admin.ModelAdmin):
 
     def update_prices(self, request, queryset):
         updated = 0
-        for holding in queryset:
-            price = fetch_latest_price(holding.ticker)
+        for asset in queryset:
+            price = fetch_latest_price(asset.ticker)
             if price:
-                holding.current_price = price
-                holding.save()
+                asset.current_price = price
+                asset.save()
                 updated += 1
         self.message_user(request, f"{updated} 件の株価を更新しました。")
 

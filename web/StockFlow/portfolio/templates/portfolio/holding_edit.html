@@ -1,5 +1,5 @@
-<!-- edit_holding.html -->
-<h2>{{ holding.name }} を編集</h2>
+<!-- edit_asset.html -->
+<h2>{{ asset.name }} を編集</h2>
 
 <form method="post">
   {% csrf_token %}
@@ -7,5 +7,5 @@
   <button type="submit">更新</button>
 </form>
 
-<a href="{% url 'holding_list' %}">戻る</a>
+<a href="{% url 'asset_list' %}">戻る</a>
 
