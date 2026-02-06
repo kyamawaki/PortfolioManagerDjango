@@ -2,44 +2,44 @@ from decimal import Decimal
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, F
-from .models import Holding
-from .forms import HoldingForm
+from .models import Asset
+from .forms import AssetForm
 from .services import fetch_latest_price, fetch_usd_jpy
 
 #################################
-# list holdings
+# list assets
 #################################
-def holding_list(request):
-    holdings = Holding.objects.all()
+def asset_list(request):
+    assets = Asset.objects.all()
 
     today = date.today()
-    needs_update = any(h.last_updated != today for h in holdings)
+    needs_update = any(asset.last_updated != today for asset in assets)
     if needs_update:
         usd_jpy = fetch_usd_jpy()
         if usd_jpy is None:
             usd_jpy = 0.0
 
-        for h in holdings:
+        for asset in assets:
             # float to decimal
-            h.exchange_rate = Decimal(str(usd_jpy))
-            price = fetch_latest_price(h.ticker)
+            asset.exchange_rate = Decimal(str(usd_jpy))
+            price = fetch_latest_price(asset.ticker)
             if price:
                 # float to decimal
-                h.current_price = Decimal(str(price))
+                asset.current_price = Decimal(str(price))
 
-            h.last_updated = today
-            h.save()
+            asset.last_updated = today
+            asset.save()
 
-    last_updated = holdings.first().last_updated if holdings else None
+    last_updated = assets.first().last_updated if assets else None
 
-    total_valuation = sum(h.valuation or 0 for h in holdings)
-    total_valuation_jpy = sum(h.valuation_jpy or 0 for h in holdings)
-    total_profit = sum(h.profit or 0 for h in holdings)
-    total_profit_jpy = sum(h.profit_jpy or 0 for h in holdings)
+    total_valuation = sum(asset.valuation or 0 for asset in assets)
+    total_valuation_jpy = sum(asset.valuation_jpy or 0 for asset in assets)
+    total_profit = sum(asset.profit or 0 for asset in assets)
+    total_profit_jpy = sum(asset.profit_jpy or 0 for asset in assets)
 
-    exchange_rate = holdings[0].exchange_rate if holdings else None
+    exchange_rate = assets[0].exchange_rate if assets else None
 
-    return render(request, 'portfolio/holding_list.html', {'holdings': holdings,
+    return render(request, 'portfolio/asset_list.html', {'assets': assets,
                                                            'last_updated': last_updated,
                                                            'total_valuation': total_valuation,
                                                            'total_valuation_jpy': total_valuation_jpy,
@@ -49,59 +49,59 @@ def holding_list(request):
                   })
 
 #################################
-# Add holding
+# Add asset
 #################################
-def holding_create(request):
+def asset_create(request):
     if request.method == 'POST':
-        form = HoldingForm(request.POST)
+        form = AssetForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('holding_list')
+            return redirect('asset_list')
     else:
-        form = HoldingForm()
+        form = AssetForm()
 
-    return render(request, 'portfolio/holding_create.html', {'form': form})
+    return render(request, 'portfolio/asset_create.html', {'form': form})
 
 #################################
-# Edit holding
+# Edit asset
 #################################
-def holding_edit(request, pk):
-    holding = get_object_or_404(Holding, pk=pk)
+def asset_edit(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
 
     if request.method == 'POST':
-        form = HoldingForm(request.POST, instance=holding)
+        form = AssetForm(request.POST, instance=asset)
         if form.is_valid():
             form.save()
-            return redirect('holding_list')
+            return redirect('asset_list')
     else:
-        form = HoldingForm(instance=holding)
+        form = AssetForm(instance=asset)
 
-    return render(request, 'portfolio/holding_edit.html', {'form': form, 'holding': holding})
-
-#################################
-# Delete holding
-#################################
-def holding_delete(request, pk):
-    holding = get_object_or_404(Holding, pk=pk)
-    holding.delete()
-    return redirect('holding_list')
+    return render(request, 'portfolio/asset_edit.html', {'form': form, 'asset': asset})
 
 #################################
-# Update holding
+# Delete asset
 #################################
-def holding_update(request):
+def asset_delete(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    asset.delete()
+    return redirect('asset_list')
+
+#################################
+# Update asset
+#################################
+def asset_update(request):
     usd_jpy = fetch_usd_jpy()
     if usd_jpy is None:
         return None
 
     today = date.today()
-    holdings = Holding.objects.all()
-    for h in holdings:
-        price = fetch_latest_price(h.ticker)
+    assets = Asset.objects.all()
+    for asset in assets:
+        price = fetch_latest_price(asset.ticker)
         if price:
-            h.current_price = Decimal(str(price))
-            h.exchange_rate = Decimal(str(usd_jpy))
-            h.last_updated = today
-            h.save()
+            asset.current_price = Decimal(str(price))
+            asset.exchange_rate = Decimal(str(usd_jpy))
+            asset.last_updated = today
+            asset.save()
 
-    return redirect('holding_list')
+    return redirect('asset_list')

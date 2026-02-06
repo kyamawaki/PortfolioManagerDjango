@@ -1,10 +1,10 @@
 from django import forms
-from .models import Holding
+from .models import Asset
 import yfinance as yf
 
-class HoldingForm(forms.ModelForm):
+class AssetForm(forms.ModelForm):
     class Meta:
-        model = Holding
+        model = Asset
         fields = ["name", "ticker", "quantity", "average_price"]
 
     def clean_ticker(self):
