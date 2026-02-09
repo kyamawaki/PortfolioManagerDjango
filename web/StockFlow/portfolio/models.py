@@ -5,6 +5,11 @@ from decimal import Decimal
 # Asset Model
 ################################################
 class Asset(models.Model):
+
+    ticker = models.CharField(max_length=20)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    current_price = models.DecimalField(max_digits=10, decimal_places=2)
+    exchange_rate = models.DecimalField(max_digits=10, decimal_places=2, default=1)
     name = models.CharField("名前", max_length=100, unique=True)
     ticker = models.CharField("Ticker", max_length=10)
     quantity = models.PositiveIntegerField("数量")
@@ -13,6 +18,22 @@ class Asset(models.Model):
     current_price_jpy = models.DecimalField("現在価格（円）", max_digits=10, decimal_places=2, null=True, blank=True)
     exchange_rate = models.DecimalField("為替レート", max_digits=6, decimal_places=2, default=150.00)
     last_updated = models.DateField(null=True, blank=True)
+
+    # 資産クラス
+    ASSET_CLASS_CHOICES = [
+        ('JP_STOCK', '日本株'),
+        ('US_STOCK', '海外株'),
+        ('REAL_ESTATE', '不動産'),
+        ('GOLD', '貴金属'),
+        ('JP_BOND', '国内債券'),
+        ('US_BOND', '海外債権'),
+        ('CASH', '現金'),
+    ]
+    asset_class = models.CharField(
+        max_length=20,
+        choices=ASSET_CLASS_CHOICES,
+        default='JP_STOCK',
+    )
 
     # 現在価格（USD）
     @property
