@@ -5,7 +5,7 @@ import yfinance as yf
 class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
-        fields = ["name", "ticker", "quantity", "average_price"]
+        fields = ["name", "ticker", "asset_class", "quantity", "average_price"]
 
     def clean_ticker(self):
         ticker = self.cleaned_data['ticker']

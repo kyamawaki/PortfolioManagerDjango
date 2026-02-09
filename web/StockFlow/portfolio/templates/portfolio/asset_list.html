@@ -62,7 +62,7 @@
       <table class="table table-striped table-hover table-bordered align-middle">
         <thead>
           <tr>
-              <th>名前</th><th>Ticker</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額</th><th>損益</th><th>割合(%)</th>
+              <th>名前</th><th>Ticker</th><th>資産クラス</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額</th><th>損益</th><th>割合(%)</th>
           </tr>
         </thead>
         <tbody>
@@ -70,6 +70,7 @@
           <tr>
             <td>{{ asset.name }}</td>
             <td>{{ asset.ticker }}</td>
+            <td>{{ asset.get_asset_class_display }}</td>
             <td>{{ asset.quantity|intcomma }}</td>
             <td>{{ asset.average_price|floatformat:2|intcomma}}</td>
             <td>{{ asset.current_price|floatformat:2|intcomma}}</td>
