@@ -105,3 +105,27 @@ def asset_update(request):
             asset.save()
 
     return redirect('asset_list')
+
+def asset_summary_ticker(request):
+    # 評価額 = current_price * quantity * exchange_rate
+    assets = Asset.objects.annotate(
+        value=F('current_price') * F('quantity') * F('exchange_rate')
+    )
+
+    # ticker ごとに集計
+    grouped = assets.values('ticker').annotate(
+        total_value=Sum('value')
+    )
+
+    # 全体の総額
+    total = sum(item['total_value'] for item in grouped)
+
+    # 割合を追加
+    for item in grouped:
+        item['ratio'] = (item['total_value'] / total * 100) if total > 0 else 0
+
+    return render(request, "portfolio/asset_summary_ticker.html", {
+        "grouped": grouped,
+        "total": total,
+    })
+

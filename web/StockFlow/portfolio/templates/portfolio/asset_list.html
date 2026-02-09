@@ -46,6 +46,8 @@
     <a href="{% url 'asset_create' %}">新規追加</a>
     |
     <a href="{% url 'asset_update' %}" onclick="showLoading()">即時更新</a>
+    |
+    <a href="{% url 'asset_summary_ticker' %}"">銘柄別サマリー</a>
 
     {% if last_updated %}
         <p>最終更新日: {{ last_updated|date:"Y-m-d" }}</p>
