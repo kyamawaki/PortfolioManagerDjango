@@ -7,5 +7,6 @@ urlpatterns = [
     path("assets/edit/<int:pk>/", views.asset_edit, name="asset_edit"),
     path("assets/delete/<int:pk>/", views.asset_delete, name="asset_delete"),
     path("assets/update/", views.asset_update, name="asset_update"),
+    path("assets/summary/ticker/", views.asset_summary_ticker, name="asset_summary_ticker"),
 ]
 
