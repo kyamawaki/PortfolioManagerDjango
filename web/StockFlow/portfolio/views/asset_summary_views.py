@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, F
+<<<<<<< Updated upstream
 from .models import Asset
+=======
+from portfolio.models import Asset
+>>>>>>> Stashed changes
 
 def asset_summary_ticker(request):
     # 評価額 = current_price * quantity * exchange_rate
