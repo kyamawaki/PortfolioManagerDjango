@@ -22,7 +22,7 @@ def asset_list(request):
         for asset in assets:
             # float to decimal
             asset.exchange_rate = Decimal(str(usd_jpy))
-            price = fetch_latest_price(asset.ticker)
+            price = fetch_latest_price(asset.asset_class, asset.ticker)
             if price:
                 # float to decimal
                 asset.current_price = Decimal(str(price))
@@ -97,7 +97,7 @@ def asset_update(request):
     today = date.today()
     assets = Asset.objects.all()
     for asset in assets:
-        price = fetch_latest_price(asset.ticker)
+        price = fetch_latest_price(asset.asset_class, asset.ticker)
         if price:
             asset.current_price = Decimal(str(price))
             asset.exchange_rate = Decimal(str(usd_jpy))
