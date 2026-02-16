@@ -34,6 +34,10 @@ class Asset(models.Model):
         default='JP_STOCK',
     )
 
+    # 海外資産判定
+    def is_foreign_asset(self):
+        return self.asset_class in ("US_STOCK", "US_BOND")
+
     # 現在価格（USD）
     @property
     def valuation(self):
@@ -44,7 +48,7 @@ class Asset(models.Model):
     # 現在価格（日本円）
     @property
     def valuation_jpy(self):
-        if self.asset_class in ("US_STOCK", "US_BOND", "GOLD"):
+        if self.is_foreign_asset:
             return self.valuation * self.exchange_rate
         else:
             return self.valuation
@@ -59,7 +63,7 @@ class Asset(models.Model):
     # 評価額（日本円）
     @property
     def profit_jpy(self):
-        if self.asset_class in ("US_STOCK", "US_BOND", "GOLD"):
+        if self.is_foreign_asset:
             return self.profit * self.exchange_rate
         else:
             return self.profit

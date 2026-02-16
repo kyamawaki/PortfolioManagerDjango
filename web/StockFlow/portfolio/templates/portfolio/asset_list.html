@@ -74,14 +74,43 @@
             <td>{{ asset.ticker }}</td>
             <td>{{ asset.get_asset_class_display }}</td>
             <td>{{ asset.quantity|intcomma }}</td>
-            <td>{{ asset.average_price|floatformat:2|intcomma}}</td>
-            <td>{{ asset.current_price|floatformat:2|intcomma}}</td>
-            <td>(USD) {{ asset.valuation|floatformat:0|intcomma }}<br>(JPY) {{ asset.valuation_jpy|floatformat:0|intcomma }}</td>
+            <td>
+                {% if asset.is_foreign_asset %}
+                    (USD)
+                {% else %}
+                    (JPY)
+                {% endif %}
+                {{ asset.average_price|floatformat:2|intcomma}}
+            </td>
+            <td>
+                {% if asset.is_foreign_asset %}
+                    (USD)
+                {% else %}
+                    (JPY)
+                {% endif %}
+                {{ asset.current_price|floatformat:2|intcomma}}
+            </td>
+            <td>
+                {% if asset.is_foreign_asset %}
+                    (USD) {{ asset.valuation|floatformat:0|intcomma }}<br>
+                {% endif %}
+                (JPY) {{ asset.valuation_jpy|floatformat:0|intcomma }}
+            </td>
             <td>
                 {% if asset.profit >= 0 %}
-                    <span style="color:green;">(USD) {{ asset.profit|floatformat:0|intcomma}}<br>(JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}</span>
+                    <span style="color:green;">
+                        {% if asset.is_foreign_asset %}
+                            (USD) {{ asset.profit|floatformat:0|intcomma}}<br>
+                        {% endif %}
+                        (JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}
+                    </span>
                 {% else %}
-                    <span style="color:red;">(USD) {{ asset.profit|floatformat:0|intcomma}}<br>(JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}</span>
+                    <span style="color:red;">
+                        {% if asset.is_foreign_asset %}
+                            (USD) {{ asset.profit|floatformat:0|intcomma}}<br>
+                        {% endif %}
+                        (JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}
+                    </span>
                 {% endif %}
             </td>
             <td>{{ asset.ratio|floatformat:2}}</td>
