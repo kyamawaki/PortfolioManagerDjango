@@ -1,3 +1,4 @@
+import re
 from django import forms
 from .models import Asset
 import yfinance as yf
@@ -7,10 +8,25 @@ class AssetForm(forms.ModelForm):
         model = Asset
         fields = ["name", "ticker", "asset_class", "quantity", "average_price"]
 
-    def clean_ticker(self):
-        ticker = self.cleaned_data['ticker']
+    # フィールドの検証
+    def clean(self):
+        asset_class = self.cleaned_data.get('asset_class')
+        ticker = self.cleaned_data.get('ticker')
 
         # 存在チェック
+        if asset_class == 'JP_STOCK':
+            self._validate_jp_stock(ticker)
+
+        elif asset_class == "US_STOCK":
+            self._validate_us_stock(ticker)
+
+    # 証券コード検証
+    def _validate_jp_stock(self, ticker):
+        if not re.match(r'^\d{4}$', ticker):
+            raise forms.ValidationError("日本の証券コードは4桁です")
+
+    # ticker確認
+    def _validate_us_stock(self, ticker):
         try:
             data = yf.Ticker(ticker).history(period="1d")
         except Exception:
@@ -18,5 +34,3 @@ class AssetForm(forms.ModelForm):
 
         if data.empty:
             raise forms.ValidationError("このティッカーは存在しません")
-
-        return ticker

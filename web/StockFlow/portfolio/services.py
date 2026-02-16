@@ -2,13 +2,23 @@ import requests
 import logging
 import os
 from datetime import date
+import yfinance as yf
 
 logger = logging.getLogger(__name__)
 
 ##############################################################
 # 最新の値（１日前の終値を取得する）
 ##############################################################
-def fetch_latest_price(ticker):
+def fetch_latest_price(asset_class, ticker):
+    if asset_class in ("US_STOCK", "US_BOND"):
+        return _fetch_latest_price_us(ticker)
+    else:
+        return _fetch_latest_price_jp(ticker)
+    
+##############################################################
+# 米国株最新の値（１日前の終値を取得する）
+##############################################################
+def _fetch_latest_price_us(ticker):
     API_KEY = os.getenv("FINNHUB_API_KEY")
     url =  f"https://finnhub.io/api/v1/quote?symbol={ticker}&token={API_KEY}"
     try:
@@ -22,6 +32,26 @@ def fetch_latest_price(ticker):
 
     except Exception as e:
         logger.exception(f"[fetch_stock_price] ERROR ticker={ticker}")
+        return None
+    
+##############################################################
+# 日本株最新の値（１日前の終値を取得する）
+##############################################################
+def _fetch_latest_price_jp(ticker):
+    
+    try:
+        logger.info(f"[fetch_stock_price_jp] ticker={ticker}")
+        data = yf.Ticker(f"{ticker}.T")
+        logger.info(f"[fetched_stock_price_jp]")
+        if data is None:
+            return None;
+    
+        price = data.info["regularMarketPrice"]
+        print(price)         
+        return price
+
+    except Exception as e:
+        logger.exception(f"[fetch_stock_price_jp] ERROR ticker={ticker}")
         return None
     
 ##############################################################
