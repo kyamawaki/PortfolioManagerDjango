@@ -22,8 +22,6 @@ class Asset(models.Model):
     ASSET_CLASS_CHOICES = [
         ('JP_STOCK', '日本株'),
         ('US_STOCK', '海外株'),
-        ('REAL_ESTATE', '不動産'),
-        ('GOLD', '貴金属'),
         ('JP_BOND', '国内債券'),
         ('US_BOND', '海外債権'),
         ('CASH', '現金'),
