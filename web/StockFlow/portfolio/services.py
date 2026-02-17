@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import date
 import yfinance as yf
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -38,22 +39,17 @@ def _fetch_latest_price_us(ticker):
 # 日本株最新の値（１日前の終値を取得する）
 ##############################################################
 def _fetch_latest_price_jp(ticker):
-    
-    try:
-        logger.info(f"[fetch_stock_price_jp] ticker={ticker}")
-        data = yf.Ticker(f"{ticker}.T")
-        logger.info(f"[fetched_stock_price_jp]")
-        if data is None:
-            return None;
-    
-        price = data.info["regularMarketPrice"]
-        print(price)         
-        return price
+    url = f"https://finance.yahoo.co.jp/quote/{ticker}"
+    logger.info(f"[fetch_latest_price_p] ticker={ticker}")
+    html = requests.get(url).text
+    logger.info(f"[fetched_fund_price]")
+    soup = BeautifulSoup(html, "html.parser")
 
-    except Exception as e:
-        logger.exception(f"[fetch_stock_price_jp] ERROR ticker={ticker}")
-        return None
-    
+    # 基準価額のセレクタ（2025年時点）
+    price_tag = soup.select_one("span._3rXWJKZF")
+    if price_tag:
+        return price_tag.text.replace(",", "")
+    return None
 ##############################################################
 # 最新のドル円レート（１日前の終値を取得する）
 ##############################################################
@@ -72,3 +68,4 @@ def fetch_usd_jpy():
     except Exception as e:
         logger.exception(f"[fetch_exchange_rate] ERROR")
         return None
+
