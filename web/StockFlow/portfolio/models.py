@@ -22,6 +22,7 @@ class Asset(models.Model):
     ASSET_CLASS_CHOICES = [
         ('JP_STOCK', '日本株'),
         ('US_STOCK', '海外株'),
+        ('JP_FUND', '投資信託'),
         ('JP_BOND', '国内債券'),
         ('US_BOND', '海外債権'),
         ('CASH', '現金'),
@@ -29,12 +30,18 @@ class Asset(models.Model):
     asset_class = models.CharField(
         max_length=20,
         choices=ASSET_CLASS_CHOICES,
-        default='JP_STOCK',
+        default='JP_FUND',
     )
 
     # 海外資産判定
+    @property
     def is_foreign_asset(self):
         return self.asset_class in ("US_STOCK", "US_BOND")
+
+    # 投資信託判定
+    @property
+    def is_jpfund_asset(self):
+        return self.asset_class in ("JP_FUND",)
 
     # 現在価格（USD）
     @property
@@ -46,8 +53,11 @@ class Asset(models.Model):
     # 現在価格（日本円）
     @property
     def valuation_jpy(self):
+        # print(f"{self.ticker}, {self.asset_class}")
         if self.is_foreign_asset:
             return self.valuation * self.exchange_rate
+        elif self.is_jpfund_asset:
+            return self.valuation / 10000
         else:
             return self.valuation
 
@@ -55,7 +65,8 @@ class Asset(models.Model):
     @property
     def profit(self):
         if self.current_price:
-            return (self.current_price - self.average_price) * self.quantity
+            profit = (self.current_price - self.average_price) * self.quantity
+            return profit
         return 0
     
     # 評価額（日本円）
@@ -63,6 +74,8 @@ class Asset(models.Model):
     def profit_jpy(self):
         if self.is_foreign_asset:
             return self.profit * self.exchange_rate
+        elif self.is_jpfund_asset:
+            return (self.profit / 10000)
         else:
             return self.profit
 
