@@ -16,7 +16,8 @@ class AssetForm(forms.ModelForm):
         # 存在チェック
         if asset_class == 'JP_STOCK':
             self._validate_jp_stock(ticker)
-
+        elif asset_class == "JP_FUND":
+            self._validate_jp_fund(ticker)
         elif asset_class == "US_STOCK":
             self._validate_us_stock(ticker)
 
@@ -24,6 +25,11 @@ class AssetForm(forms.ModelForm):
     def _validate_jp_stock(self, ticker):
         if not re.match(r'^\d{4}$', ticker):
             raise forms.ValidationError("日本の証券コードは4桁です")
+
+    # 投信協会コード検証
+    def _validate_jp_fund(self, ticker):
+        if not re.match(r'^\d{7}[A-Z]$', ticker):
+            raise forms.ValidationError("投信協会コードは8桁です")
 
     # ticker確認
     def _validate_us_stock(self, ticker):

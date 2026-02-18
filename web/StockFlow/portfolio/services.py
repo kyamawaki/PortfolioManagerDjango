@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 def fetch_latest_price(asset_class, ticker):
     if asset_class in ("US_STOCK", "US_BOND"):
         return _fetch_latest_price_us(ticker)
-    else:
+    elif asset_class in ("JP_STOCK,"):
         return _fetch_latest_price_jp(ticker)
+    else:
+        return _fetch_latest_price_jp_fund(ticker)
     
 ##############################################################
 # 米国株最新の値（１日前の終値を取得する）
@@ -40,16 +42,37 @@ def _fetch_latest_price_us(ticker):
 ##############################################################
 def _fetch_latest_price_jp(ticker):
     url = f"https://finance.yahoo.co.jp/quote/{ticker}"
-    logger.info(f"[fetch_latest_price_p] ticker={ticker}")
+    logger.info(f"[fetch_latest_price_jp] ticker={ticker}")
     html = requests.get(url).text
-    logger.info(f"[fetched_fund_price]")
+    logger.info(f"[fetched_latest_price_jp]")
     soup = BeautifulSoup(html, "html.parser")
 
-    # 基準価額のセレクタ（2025年時点）
+    # 基準価額のセレクタ
     price_tag = soup.select_one("span._3rXWJKZF")
     if price_tag:
         return price_tag.text.replace(",", "")
     return None
+
+##############################################################
+# 投資信託最新の値
+##############################################################
+def _fetch_latest_price_jp_fund(ticker):
+    url = f"https://finance.yahoo.co.jp/quote/{ticker}"
+    logger.info(f"[fetched_latest_price_jp_fund] ticker={ticker}")
+    html = requests.get(url).text
+    logger.info(f"[fetch_latest_price_jp_fund]")
+    soup = BeautifulSoup(html, "html.parser")
+
+    # 基準価額のセレクタ
+    #if ticker == "0331418A":
+    #    with open("fund.html", "w", encoding="utf-8") as f:
+    #        f.write(soup.prettify())
+
+    price_tag = soup.select_one("span.StyledNumber__value__3rXW")
+    if price_tag:
+        return price_tag.text.replace(",", "")
+    return None
+
 ##############################################################
 # 最新のドル円レート（１日前の終値を取得する）
 ##############################################################
