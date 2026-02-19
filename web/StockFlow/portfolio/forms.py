@@ -28,8 +28,8 @@ class AssetForm(forms.ModelForm):
 
     # 投信協会コード検証
     def _validate_jp_fund(self, ticker):
-        if not re.match(r'^\d{7}[A-Z]$', ticker):
-            raise forms.ValidationError("投信協会コードは8桁です")
+        if not re.match(r'^[a-z0-9]{8,10}$', ticker, re.IGNORECASE):
+            raise forms.ValidationError("投信協会コードは8〜10桁以内の英数字です")
 
     # ticker確認
     def _validate_us_stock(self, ticker):

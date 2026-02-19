@@ -3,7 +3,8 @@
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">追加</button>
+  <button type="submit" name=""save">保存</button>
+  <button type="submit" name="add_another">保存して続けて追加</button>
 </form>
 
 <a href="{% url 'asset_list' %}">戻る</a>
