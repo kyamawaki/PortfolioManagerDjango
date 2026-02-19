@@ -21,7 +21,9 @@ def asset_list(request):
 
         for asset in assets:
             # float to decimal
-            asset.exchange_rate = Decimal(str(usd_jpy))
+            asset.exchange_rate = Decimal('1.0')
+            if asset.is_foreign_asset:
+                asset.exchange_rate = Decimal(str(usd_jpy))
             price = fetch_latest_price(asset.asset_class, asset.ticker)
             if price:
                 # float to decimal
@@ -56,6 +58,12 @@ def asset_create(request):
         form = AssetForm(request.POST)
         if form.is_valid():
             form.save()
+
+            # 連続追加
+            if "add_another" in request.POST:
+                return redirect('asset_create')
+            
+            # 保存⇒一覧へ
             return redirect('asset_list')
     else:
         form = AssetForm()
