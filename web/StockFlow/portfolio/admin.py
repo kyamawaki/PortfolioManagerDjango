@@ -5,7 +5,7 @@ from .services import fetch_latest_price
 #################################################################
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
-    list_display = ('name', 'ticker', 'quantity', 'average_price', 'current_price', 'valuation_display', 'profit_display')
+    list_display = ('name', 'ticker', 'quantity', 'average_price_usd', 'average_price_jpy')
     search_fields = ('name', 'ticker')
     actions = ['update_prices']
 
@@ -22,7 +22,10 @@ class AssetAdmin(admin.ModelAdmin):
         for asset in queryset:
             price = fetch_latest_price(asset.ticker)
             if price:
-                asset.current_price = price
+                if asset.is_foreign_asset:
+                    asset.current_price_usd = price
+                else:
+                    asset.current_price = price
                 asset.save()
                 updated += 1
         self.message_user(request, f"{updated} 件の株価を更新しました。")

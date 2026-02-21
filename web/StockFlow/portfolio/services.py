@@ -12,26 +12,28 @@ logger = logging.getLogger(__name__)
 ##############################################################
 def fetch_latest_price(asset_class, ticker):
     if asset_class in ("US_STOCK", "US_BOND"):
-        return _fetch_latest_price_us(ticker)
+        return fetch_latest_price_us(ticker)
     elif asset_class in ("JP_STOCK,"):
-        return _fetch_latest_price_jp(ticker)
+        return fetch_latest_price_jp(ticker)
     else:
-        return _fetch_latest_price_jp_fund(ticker)
+        return fetch_latest_price_jp_fund(ticker)
     
 ##############################################################
 # 米国株最新の値（１日前の終値を取得する）
 ##############################################################
-def _fetch_latest_price_us(ticker):
+def fetch_latest_price_us(ticker):
     API_KEY = os.getenv("FINNHUB_API_KEY")
     url =  f"https://finnhub.io/api/v1/quote?symbol={ticker}&token={API_KEY}"
     try:
         logger.info(f"[fetch_stock_price] ticker={ticker}")
         data = requests.get(url, timeout=5).json()
+        logger.info(f"[fetched_stock_price]")
         if data is None:
             return None
         
-        logger.info(f"[fetched_stock_price]")
-        return data["c"]
+        price = data["c"]
+        logger.info(f"ticker={ticker} price={price}")
+        return price
 
     except Exception as e:
         logger.exception(f"[fetch_stock_price] ERROR ticker={ticker}")
@@ -40,7 +42,7 @@ def _fetch_latest_price_us(ticker):
 ##############################################################
 # 日本株最新の値（１日前の終値を取得する）
 ##############################################################
-def _fetch_latest_price_jp(ticker):
+def fetch_latest_price_jp(ticker):
     url = f"https://finance.yahoo.co.jp/quote/{ticker}"
     logger.info(f"[fetch_latest_price_jp] ticker={ticker}")
     html = requests.get(url).text
@@ -48,15 +50,19 @@ def _fetch_latest_price_jp(ticker):
     soup = BeautifulSoup(html, "html.parser")
 
     # 基準価額のセレクタ
-    price_tag = soup.select_one("span._3rXWJKZF")
+    price_tag = soup.select_one("span.StyledNumber__value__3rXW")
+    #price_tag = soup.select_one("span._3rXWJKZF")
     if price_tag:
-        return price_tag.text.replace(",", "")
+        price = price_tag.text.replace(",", "")
+        logger.info(f"ticker={ticker} price={price}")
+        return price
+    
     return None
 
 ##############################################################
 # 投資信託最新の値
 ##############################################################
-def _fetch_latest_price_jp_fund(ticker):
+def fetch_latest_price_jp_fund(ticker):
     url = f"https://finance.yahoo.co.jp/quote/{ticker}"
     logger.info(f"[fetched_latest_price_jp_fund] ticker={ticker}")
     html = requests.get(url).text
@@ -70,7 +76,10 @@ def _fetch_latest_price_jp_fund(ticker):
 
     price_tag = soup.select_one("span.StyledNumber__value__3rXW")
     if price_tag:
-        return price_tag.text.replace(",", "")
+        price = price_tag.text.replace(",", "")
+        logger.info(f"ticker={ticker} price={price}")
+        return price
+    
     return None
 
 ##############################################################
