@@ -26,26 +26,24 @@ def asset_list(request):
                 asset.exchange_rate = Decimal(str(usd_jpy))
             price = fetch_latest_price(asset.asset_class, asset.ticker)
             if price:
-                # float to decimal
-                asset.current_price = Decimal(str(price))
+                if asset.is_foreign_asset:
+                   asset.current_price_usd = Decimal(str(price))
+                else:
+                   asset.current_price_jpy = Decimal(str(price))
 
             asset.last_updated = today
             asset.save()
 
     last_updated = assets.first().last_updated if assets else None
 
-    total_valuation = sum(asset.valuation or 0 for asset in assets)
     total_valuation_jpy = sum(asset.valuation_jpy or 0 for asset in assets)
-    total_profit = sum(asset.profit or 0 for asset in assets)
     total_profit_jpy = sum(asset.profit_jpy or 0 for asset in assets)
 
     exchange_rate = assets[0].exchange_rate if assets else None
 
     return render(request, 'portfolio/asset_list.html', {'assets': assets,
                                                            'last_updated': last_updated,
-                                                           'total_valuation': total_valuation,
                                                            'total_valuation_jpy': total_valuation_jpy,
-                                                           'total_profit': total_profit,
                                                            'total_profit_jpy': total_profit_jpy,
                                                            'exchange_rate': exchange_rate,
                   })
@@ -106,9 +104,14 @@ def asset_update(request):
     assets = Asset.objects.all()
     for asset in assets:
         price = fetch_latest_price(asset.asset_class, asset.ticker)
+        print(f"=== {price} ===")
         if price:
-            asset.current_price = Decimal(str(price))
-            asset.exchange_rate = Decimal(str(usd_jpy))
+            if asset.is_foreign_asset:
+                asset.current_price_usd = Decimal(str(price))
+                asset.exchange_rate = Decimal(str(usd_jpy))
+            else:
+                asset.current_price_jpy = Decimal(str(price))
+
             asset.last_updated = today
             asset.save()
 
