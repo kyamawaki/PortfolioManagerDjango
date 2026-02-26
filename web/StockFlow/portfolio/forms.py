@@ -6,7 +6,24 @@ import yfinance as yf
 class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
-        fields = ["name", "ticker", "asset_class", "quantity", "average_price_usd", "average_price_jpy"]
+        fields = ["name", "asset_class", "ticker", "quantity", "average_price_usd", "average_price_jpy"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 初期値やインスタンスのasset_classが国内債券なら平均買値フィールドを隠す
+        asset_class = None
+        if 'asset_class' in self.initial:
+            asset_class = self.initial['asset_class']
+        if self.instance and getattr(self.instance, 'asset_class', None):
+            asset_class = self.instance.asset_class
+
+        if asset_class == 'JP_BND':
+            # 国内債券の場合はtickerにJGBをセットしておく
+            self.initial.setdefault('ticker', 'JGB')
+            for fld in ('ticker', 'average_price_usd', 'average_price_jpy'):
+                # 非表示にしてrequiredを外す
+                self.fields[fld].widget = forms.HiddenInput()
+                self.fields[fld].required = False
 
     # フィールドの検証
     def clean(self):
@@ -20,6 +37,11 @@ class AssetForm(forms.ModelForm):
             self.validate_jp_fund(ticker)
         elif asset_class == "US_STOCK":
             self.validate_us_stock(ticker)
+        # 国内債券はtickerをJGBにし、平均買値を入力させない
+        if asset_class == 'JP_BND':
+            self.cleaned_data['ticker'] = 'JGB'
+            self.cleaned_data['average_price_usd'] = None
+            self.cleaned_data['average_price_jpy'] = None
 
     # 証券コード検証
     def validate_jp_stock(self, ticker):
