@@ -56,6 +56,11 @@ class Asset(models.Model):
     def is_jpfund_asset(self):
         return self.asset_class in ("JP_FUND",)
 
+    # 国内債券判定
+    @property
+    def is_jpbnd_asset(self):
+        return self.asset_class in ("JP_BOND",)
+
     # 評価額（USD）
     @property
     def valuation_usd(self):
@@ -89,6 +94,9 @@ class Asset(models.Model):
             if self.current_price_jpy and self.quantity:
                 value = self.current_price_jpy * self.quantity / 10000
                 return value
+        # 国内債券は数量と同じ
+        elif self.is_jpbnd_asset:
+            return self.quantity
             
         return Decimal('0')
   
