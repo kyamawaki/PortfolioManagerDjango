@@ -20,17 +20,21 @@ def asset_list(request):
             usd_jpy = 0.0
 
         for asset in assets:
-            # float to decimal
-            asset.exchange_rate = Decimal('1.0')
-            if asset.is_foreign_asset:
+            # exchange rate
+            if asset.is_usstock_asset or asset.is_usbnd_asset:
                 asset.exchange_rate = Decimal(str(usd_jpy))
-            price = fetch_latest_price(asset.asset_class, asset.ticker)
+            else:
+                asset.exchange_rate = Decimal('1.0')
+
+            # current price
+            price = fetch_latest_price(asset)
             if price:
-                if asset.is_foreign_asset:
+                if asset.is_usstock_asset or asset.is_usbnd_asset:
                    asset.current_price_usd = Decimal(str(price))
                 else:
                    asset.current_price_jpy = Decimal(str(price))
 
+            # updated date
             asset.last_updated = today
             asset.save()
 
@@ -103,10 +107,10 @@ def asset_update(request):
     today = date.today()
     assets = Asset.objects.all()
     for asset in assets:
-        price = fetch_latest_price(asset.asset_class, asset.ticker)
+        price = fetch_latest_price(asset)
         print(f"=== {price} ===")
         if price:
-            if asset.is_foreign_asset:
+            if asset.is_usstock_asset or asset.is_usbnd_asset:
                 asset.current_price_usd = Decimal(str(price))
                 asset.exchange_rate = Decimal(str(usd_jpy))
             else:

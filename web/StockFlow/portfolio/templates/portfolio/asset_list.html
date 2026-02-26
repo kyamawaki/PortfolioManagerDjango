@@ -75,8 +75,11 @@
             <td>{{ asset.get_asset_class_display }}</td>
             <td>{{ asset.quantity|intcomma }}</td>
             <td>
-                {% if asset.is_foreign_asset %}
+                {% if asset.is_usstock_asset %}
                     (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
+                {% elif asset.is_usbnd_asset %}
+                    (USD){{ asset.average_price_usd|floatformat:2|intcomma}}<br>
+                    (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
                 {% else %}
                     (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
                 {% endif %}
@@ -95,7 +98,7 @@
                 (JPY) {{ asset.valuation_jpy|floatformat:0|intcomma }}
             </td>
             <td>
-                {% if asset.profit >= 0 %}
+                {% if asset.profit_jpy >= 0 %}
                     <span style="color:green;">
                         {% if asset.is_foreign_asset %}
                             (USD) {{ asset.profit_usd|floatformat:0|intcomma}}<br>

@@ -4,24 +4,28 @@ import os
 from datetime import date
 import yfinance as yf
 from bs4 import BeautifulSoup
+from portfolio.models import Asset
 
 logger = logging.getLogger(__name__)
 
 ##############################################################
-# 最新の値（１日前の終値を取得する）
+# 最新の値
 ##############################################################
-def fetch_latest_price(asset_class, ticker):
-    if asset_class in ("US_STOCK", "US_BOND"):
-        return fetch_latest_price_us(ticker)
-    elif asset_class in ("JP_STOCK,"):
-        return fetch_latest_price_jp(ticker)
+def fetch_latest_price(asset):
+    if asset.is_usstock_asset:
+        return fetch_latest_price_us(asset)
+    elif asset.is_usbnd_asset:
+        return fetch_latest_price_usbnd(asset)
+    elif asset.is_jpstock_asset:
+        return fetch_latest_price_jp(asset)
     else:
-        return fetch_latest_price_jp_fund(ticker)
+        return fetch_latest_price_jp_fund(asset)
     
 ##############################################################
 # 米国株最新の値（１日前の終値を取得する）
 ##############################################################
-def fetch_latest_price_us(ticker):
+def fetch_latest_price_us(asset):
+    ticker = asset.ticker
     API_KEY = os.getenv("FINNHUB_API_KEY")
     url =  f"https://finnhub.io/api/v1/quote?symbol={ticker}&token={API_KEY}"
     try:
@@ -40,9 +44,16 @@ def fetch_latest_price_us(ticker):
         return None
     
 ##############################################################
-# 日本株最新の値（１日前の終値を取得する）
+# 米国債権の値
 ##############################################################
-def fetch_latest_price_jp(ticker):
+def fetch_latest_price_usbnd(asset):
+    return asset.quantity
+    
+##############################################################
+# 日本株最新の値
+##############################################################
+def fetch_latest_price_jp(asset):
+    ticker = asset.ticker
     url = f"https://finance.yahoo.co.jp/quote/{ticker}"
     logger.info(f"[fetch_latest_price_jp] ticker={ticker}")
     html = requests.get(url).text
@@ -62,25 +73,8 @@ def fetch_latest_price_jp(ticker):
 ##############################################################
 # 投資信託最新の値
 ##############################################################
-def fetch_latest_price_jp_fund(ticker):
-    url = f"https://finance.yahoo.co.jp/quote/{ticker}"
-    logger.info(f"[fetched_latest_price_jp_fund] ticker={ticker}")
-    html = requests.get(url).text
-    logger.info(f"[fetch_latest_price_jp_fund]")
-    soup = BeautifulSoup(html, "html.parser")
-
-    # 基準価額のセレクタ
-    #if ticker == "0331418A":
-    #    with open("fund.html", "w", encoding="utf-8") as f:
-    #        f.write(soup.prettify())
-
-    price_tag = soup.select_one("span.StyledNumber__value__3rXW")
-    if price_tag:
-        price = price_tag.text.replace(",", "")
-        logger.info(f"ticker={ticker} price={price}")
-        return price
-    
-    return None
+def fetch_latest_price_jp_fund(asset):
+    return fetch_latest_price_jp(asset)
 
 ##############################################################
 # 最新のドル円レート（１日前の終値を取得する）
