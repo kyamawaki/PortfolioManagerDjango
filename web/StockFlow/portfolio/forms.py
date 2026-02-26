@@ -6,7 +6,7 @@ import yfinance as yf
 class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
-        fields = ["name", "asset_class", "ticker", "quantity", "average_price_usd", "average_price_jpy"]
+        fields = ["name", "asset_class", "owner", "financial_institution", "account_type", "ticker", "quantity", "average_price_usd", "average_price_jpy"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -33,6 +33,25 @@ class Asset(models.Model):
         default='JP_FUND',
     )
 
+    # 所有者
+    owner = models.CharField("所有者", max_length=100, null=True, blank=True)
+
+    # 金融機関名
+    financial_institution = models.CharField("金融機関名", max_length=100, null=True, blank=True)
+
+    # 口座種別
+    ACCOUNT_TYPE_CHOICES = [
+        ('TAXABLE', '特定'),
+        ('NISA', 'NISA'),
+    ]
+    account_type = models.CharField(
+        "口座種別",
+        max_length=20,
+        choices=ACCOUNT_TYPE_CHOICES,
+        null=True,
+        blank=True,
+    )
+
     # 資産クラスごとの必須入力と固定ticker定義
     REQUIRED_FIELDS_BY_CLASS = {
         'US_STOCK': ['ticker', 'average_price_usd'],
