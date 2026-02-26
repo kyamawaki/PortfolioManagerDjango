@@ -8,7 +8,7 @@ class Asset(models.Model):
 
     name = models.CharField("名前", max_length=100, unique=True)
     ticker = models.CharField("Ticker", max_length=10)
-    quantity = models.PositiveIntegerField("数量")
+    quantity = models.DecimalField("数量", max_digits=10, decimal_places=2, default=0)
     average_price_usd = models.DecimalField("平均買値（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
     average_price_jpy = models.DecimalField("平均買値（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
     current_price_usd = models.DecimalField("現在価格（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
@@ -18,12 +18,14 @@ class Asset(models.Model):
 
     # 資産クラス
     ASSET_CLASS_CHOICES = [
+        ('US_STOCK', '外国株'),
+        ('US_BND', '外国債権'),
+        ('US_MMF', 'ドル建てMMF'),
+        ('US_CASH', 'ドル建て現金'),
         ('JP_STOCK', '日本株'),
-        ('US_STOCK', '海外株'),
         ('JP_FUND', '投資信託'),
-        ('JP_BOND', '国内債券'),
-        ('US_BOND', '海外債権'),
-        ('CASH', '現金'),
+        ('JP_BND', '国内債券'),
+        ('JP_CASH', '現金'),
     ]
     asset_class = models.CharField(
         max_length=20,
@@ -31,10 +33,38 @@ class Asset(models.Model):
         default='JP_FUND',
     )
 
+    # 資産クラスごとの必須入力と固定ticker定義
+    REQUIRED_FIELDS_BY_CLASS = {
+        'US_STOCK': ['ticker', 'average_price_usd'],
+        'US_BND'  : ['ticker', 'average_price_jpy'],
+        'US_MMF'  : ['average_price_jpy'],
+        'US_CASH' : [],
+        'JP_STOCK': ['ticker', 'average_price_jpy'],
+        'JP_FUND' : ['ticker', 'average_price_jpy'],
+        'JP_BND'  : [],
+        'JP_CASH' : [],
+    }
+
+    FIXED_TICKER = {
+        'US_BND' : 'US_BND',
+        'US_MMF' : 'US_MMF',
+        'US_CASH': 'US_CASH',
+        'JP_BND' : 'JP_BND',
+        'JP_CASH': 'JP_CASH',
+    }
+
+    @classmethod
+    def required_fields(cls, asset_class):
+        return cls.REQUIRED_FIELDS_BY_CLASS.get(asset_class, [])
+
+    @classmethod
+    def fixed_ticker(cls, asset_class):
+        return cls.FIXED_TICKER.get(asset_class)
+
     # 海外資産判定
     @property
     def is_foreign_asset(self):
-        return self.asset_class in ("US_STOCK", "US_BOND")
+        return self.asset_class in ("US_STOCK", "US_BND")
 
     # 海外株判定
     @property
@@ -44,7 +74,7 @@ class Asset(models.Model):
     # 海外債権判定
     @property
     def is_usbnd_asset(self):
-        return self.asset_class in ("US_BOND", )
+        return self.asset_class in ("US_BND", )
 
     # 日本株判定
     @property
@@ -59,7 +89,7 @@ class Asset(models.Model):
     # 国内債券判定
     @property
     def is_jpbnd_asset(self):
-        return self.asset_class in ("JP_BOND",)
+        return self.asset_class in ("JP_BND",)
 
     # 評価額（USD）
     @property

@@ -7,5 +7,68 @@
   <button type="submit" name="add_another">保存して続けて追加</button>
 </form>
 
+<script>
+// モデルで定義した必須フィールド情報
+const REQUIRED_FIELDS = {
+  'US_STOCK': ['ticker', 'average_price_usd'],
+  'US_BND' : ['ticker', 'average_price_jpy'],
+  'US_MMF'  : ['average_price_jpy'],
+  'US_CASH' : [],
+  'JP_STOCK': ['ticker', 'average_price_jpy'],
+  'JP_FUND' : ['ticker', 'average_price_jpy'],
+  'JP_BND' : [],
+  'JP_CASH' : [],
+};
+
+// モデルで定義した固定ticker情報
+const FIXED_TICKER = {
+  'US_BND' : 'US_BND',
+  'US_MMF' : 'US_MMF',
+  'US_CASH': 'US_CASH',
+  'JP_BND' : 'JP_BND',
+  'JP_CASH': 'JP_CASH',
+};
+
+function toggleFieldsByAssetClass() {
+  var sel = document.getElementById('id_asset_class');
+  if (!sel) return;
+  
+  var assetClass = sel.value;
+  var requiredFields = REQUIRED_FIELDS[assetClass] || [];
+  var fixedTicker = FIXED_TICKER[assetClass];
+  
+  // 対象フィールドすべて
+  var allFields = ['ticker', 'average_price_usd', 'average_price_jpy'];
+  
+  // 各フィールドの表示/非表示を切り替え
+  allFields.forEach(function(field) {
+    var elem = document.getElementById('id_' + field);
+    if (elem && elem.closest('p')) {
+      var shouldShow = requiredFields.includes(field);
+      elem.closest('p').style.display = shouldShow ? '' : 'none';
+    }
+  });
+  
+  // 固定tickerがあれば設定して非表示に
+  if (fixedTicker) {
+    var ticker = document.getElementById('id_ticker');
+    if (ticker) {
+      ticker.value = fixedTicker;
+      if (ticker.closest('p')) {
+        ticker.closest('p').style.display = 'none';
+      }
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var sel = document.getElementById('id_asset_class');
+  if (sel) {
+    sel.addEventListener('change', toggleFieldsByAssetClass);
+    toggleFieldsByAssetClass();
+  }
+});
+</script>
+
 <a href="{% url 'asset_list' %}">戻る</a>
 
