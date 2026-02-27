@@ -77,36 +77,42 @@
             <td>{{ asset.financial_institution }}</td>
             <td>{{ asset.get_account_type_display }}</td>
             <td>{{ asset.quantity|intcomma }}</td>
+            <!-- 平均買値 -->
             <td>
                 {% if asset.is_usstock_asset %}
                     (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
                 {% elif asset.is_usbnd_asset %}
                     (USD){{ asset.average_price_usd|floatformat:2|intcomma}}<br>
                     (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
+                {% elif asset.is_usmmf_asset or asset.is_uscash_asset %}
+                    (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
                 {% else %}
                     (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
                 {% endif %}
             </td>
+            <!-- 現在価格 -->
             <td>
-                {% if asset.is_foreign_asset %}
+                {% if asset.is_usstock_asset or asset.is_usbnd_asset %}
                     (USD){{ asset.current_price_usd|floatformat:2|intcomma}}
                 {% else %}
                     (JPY){{ asset.current_price_jpy|floatformat:2|intcomma}}
                 {% endif %}
             </td>
+            <!-- 評価額 -->
             <td>
                 {% if asset.is_foreign_asset %}
-                    (USD) {{ asset.valuation_usd|floatformat:0|intcomma }}<br>
+                    (USD) {{ asset.valuation_usd|floatformat:2|intcomma }}<br>
                 {% endif %}
-                (JPY) {{ asset.valuation_jpy|floatformat:0|intcomma }}
+                (JPY) {{ asset.valuation_jpy|floatformat:2|intcomma }}
             </td>
+            <!-- 損益 -->
             <td>
                 {% if asset.profit_jpy >= 0 %}
                     <span style="color:green;">
                         {% if asset.is_foreign_asset %}
-                            (USD) {{ asset.profit_usd|floatformat:0|intcomma}}<br>
+                            (USD) {{ asset.profit_usd|floatformat:2|intcomma}}<br>
                         {% endif %}
-                        (JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}
+                        (JPY) {{ asset.profit_jpy|floatformat:2|intcomma}}
                     </span>
                 {% else %}
                     <span style="color:red;">

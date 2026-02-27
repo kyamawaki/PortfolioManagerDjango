@@ -83,17 +83,28 @@ class Asset(models.Model):
     # 海外資産判定
     @property
     def is_foreign_asset(self):
-        return self.asset_class in ("US_STOCK", "US_BND")
+        # treat any US denominated asset as foreign
+        return self.asset_class in ("US_STOCK", "US_BND", "US_MMF", "US_CASH")
 
     # 海外株判定
     @property
     def is_usstock_asset(self):
-        return self.asset_class in ("US_STOCK", )
+        return self.asset_class == "US_STOCK"
 
     # 海外債権判定
     @property
     def is_usbnd_asset(self):
-        return self.asset_class in ("US_BND", )
+        return self.asset_class == "US_BND"
+
+    # ドル建てMMF判定
+    @property
+    def is_usmmf_asset(self):
+        return self.asset_class == "US_MMF"
+
+    # ドル建て現金判定
+    @property
+    def is_uscash_asset(self):
+        return self.asset_class == "US_CASH"
 
     # 日本株判定
     @property
@@ -118,9 +129,12 @@ class Asset(models.Model):
         # 株式は一株あたりの価格x数量
         if self.is_usstock_asset:
             return self.current_price_usd * self.quantity
-        # ドル建て債権の評価額は数量と等しい
+        # ドル建て債権は current_price_usd を返す（fetch_latest_price_usbnd が数量を返す）
         elif self.is_usbnd_asset:
             return self.current_price_usd
+        # 外貨建てMMF/外貨のUSD評価は数量そのもの（単位: USD）
+        elif self.is_usmmf_asset or self.is_uscash_asset:
+            return self.quantity
         return Decimal('0')
     
     # 評価額（JPY）
@@ -129,8 +143,12 @@ class Asset(models.Model):
         # print(f"{self.ticker}, {self.asset_class}")
         # print(f"{self.current_price_jpy}, {self.quantity}")
 
-        # 米国株 / ドル建て債権
+        # 米国株/ドル建て債権
         if self.is_usstock_asset or self.is_usbnd_asset:
+            value = self.valuation_usd * self.exchange_rate
+            return value
+        # ドル建てMMF/ドル建て現金
+        elif self.is_usmmf_asset or self.is_uscash_asset:
             value = self.valuation_usd * self.exchange_rate
             return value
         # 日本株
@@ -146,44 +164,58 @@ class Asset(models.Model):
         # 国内債券は数量と同じ
         elif self.is_jpbnd_asset:
             return self.quantity
-            
+        # 国内現金も数量と同じ
+        elif self.asset_class == 'JP_CASH':
+            return self.quantity
+        
         return Decimal('0')
   
     # 損益（USD）
     @property
     def profit_usd(self):
         #print(f"{self.ticker}, {self.asset_class}")
+        # 外国株
         if self.is_usstock_asset:
             if self.current_price_usd and self.average_price_usd:
-                profit = (self.current_price_usd - self.average_price_usd) * self.quantity
-                return profit
-        # ドル建て債権の損益は買値-現在値（現在値は数量と等しい）
+                return (self.current_price_usd - self.average_price_usd) * self.quantity
+        # ドル建て債権    
         elif self.is_usbnd_asset:
             if self.average_price_usd:
-                profit = (self.current_price_usd - self.average_price_usd)
-                return profit
+                return (self.current_price_usd - self.average_price_usd)
+        # US_MMF/US_CASHの評価額は現地価格では0
+        elif self.is_usmmf_asset or self.is_uscash_asset:
+            return Decimal('0')
+
+        # その他JPY資産はUSD損益なし
         return Decimal('0')
-    
+
     # 損益（JPY）
     @property
     def profit_jpy(self):
-        # 米国株(損益*為替レート)
+        # 米国株(USD損益×為替レート)
         if self.is_usstock_asset:
             return self.profit_usd * self.exchange_rate
-        # ドル建て債権(円建ての買値から計算)
+        # ドル建て債権(JPY評価額－JPY買値)
         elif self.is_usbnd_asset:
-            # print(f"{self.current_price_jpy}, {self.average_price_jpy}")
             if self.valuation_jpy and self.average_price_jpy:
-                profit = (self.valuation_jpy - self.average_price_jpy)
+                return self.valuation_jpy - self.average_price_jpy
+        # 外貨建てMMFは（為替レートの差x数値）
+        elif self.is_usmmf_asset:
+            if self.average_price_jpy and self.exchange_rate:
+                profit = (self.exchange_rate - self.average_price_jpy) * self.quantity
                 return profit
+        # 外貨現金は買値がわからないので損益はなし
+        elif self.is_uscash_asset:
+            return Decimal('0')
+        # その他JPY資産
         else:
-            profit = 0
+            profit = Decimal('0')
             if self.current_price_jpy and self.average_price_jpy:
                 profit = (self.current_price_jpy - self.average_price_jpy) * self.quantity
             if self.is_jpfund_asset:
-                return profit / 10000;
+                return profit / Decimal('10000')
             return profit
- 
+
     # 資産に対する割合
     @property
     def ratio(self):

@@ -16,6 +16,10 @@ def fetch_latest_price(asset):
         return fetch_latest_price_us(asset)
     elif asset.is_usbnd_asset:
         return fetch_latest_price_usbnd(asset)
+    elif asset.is_usmmf_asset:
+        return fetch_latest_price_usmmf(asset)
+    elif asset.is_uscash_asset:
+        return fetch_latest_price_uscash(asset)
     elif asset.is_jpstock_asset:
         return fetch_latest_price_jp(asset)
     else:
@@ -48,6 +52,18 @@ def fetch_latest_price_us(asset):
 ##############################################################
 def fetch_latest_price_usbnd(asset):
     return asset.quantity
+    
+##############################################################
+# 米国MMFの値
+##############################################################
+def fetch_latest_price_usmmf(asset):
+    return fetch_usd_jpy()
+    
+##############################################################
+# 米国CASHの値
+##############################################################
+def fetch_latest_price_uscash(asset):
+    return fetch_usd_jpy()
     
 ##############################################################
 # 日本株最新の値

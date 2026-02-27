@@ -21,7 +21,7 @@ def asset_list(request):
 
         for asset in assets:
             # exchange rate
-            if asset.is_usstock_asset or asset.is_usbnd_asset:
+            if asset.is_usstock_asset or asset.is_usbnd_asset or asset.is_usmmf_asset or asset.is_uscash_asset:
                 asset.exchange_rate = Decimal(str(usd_jpy))
             else:
                 asset.exchange_rate = Decimal('1.0')
@@ -33,6 +33,9 @@ def asset_list(request):
                    asset.current_price_usd = Decimal(str(price))
                 else:
                    asset.current_price_jpy = Decimal(str(price))
+            # MMF/現金は現在価格を為替レートと同じ値にする
+            if asset.is_usmmf_asset or asset.is_uscash_asset:
+                asset.current_price_usd = asset.exchange_rate
 
             # updated date
             asset.last_updated = today
@@ -107,17 +110,25 @@ def asset_update(request):
     today = date.today()
     assets = Asset.objects.all()
     for asset in assets:
+        # set exchange rate when USD-denominated asset
+        if asset.is_usstock_asset or asset.is_usbnd_asset or asset.is_usmmf_asset or asset.is_uscash_asset:
+            asset.exchange_rate = Decimal(str(usd_jpy))
+        else:
+            asset.exchange_rate = Decimal('1.0')
+
         price = fetch_latest_price(asset)
         print(f"=== {price} ===")
         if price:
             if asset.is_usstock_asset or asset.is_usbnd_asset:
                 asset.current_price_usd = Decimal(str(price))
-                asset.exchange_rate = Decimal(str(usd_jpy))
             else:
                 asset.current_price_jpy = Decimal(str(price))
+        # MMF/現金も現在価格を為替レートと一致させる
+        if asset.is_usmmf_asset or asset.is_uscash_asset:
+            asset.current_price_usd = asset.exchange_rate
 
-            asset.last_updated = today
-            asset.save()
+        asset.last_updated = today
+        asset.save()
 
     return redirect('asset_list')
 
