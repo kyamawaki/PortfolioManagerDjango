@@ -24,6 +24,15 @@ class AssetForm(forms.ModelForm):
                 # 非表示にしてrequiredを外す
                 self.fields[fld].widget = forms.HiddenInput()
                 self.fields[fld].required = False
+        elif asset_class == 'US_MMF':
+            # MMFは平均買値をJPYで入力させる、USDフィールドは不要
+            self.fields['average_price_usd'].widget = forms.HiddenInput()
+            self.fields['average_price_usd'].required = False
+        elif asset_class == 'US_CASH':
+            # 現金はtickerや価格フィールド不要
+            for fld in ('ticker', 'average_price_usd', 'average_price_jpy'):
+                self.fields[fld].widget = forms.HiddenInput()
+                self.fields[fld].required = False
 
     # フィールドの検証
     def clean(self):
@@ -40,6 +49,14 @@ class AssetForm(forms.ModelForm):
         # 国内債券はtickerをJGBにし、平均買値を入力させない
         if asset_class == 'JP_BND':
             self.cleaned_data['ticker'] = 'JGB'
+            self.cleaned_data['average_price_usd'] = None
+            self.cleaned_data['average_price_jpy'] = None
+        # MMFは平均買値をJPYのみ保持
+        if asset_class == 'US_MMF':
+            self.cleaned_data['average_price_usd'] = None
+        # 現金は価格やticker不要
+        if asset_class == 'US_CASH':
+            self.cleaned_data['ticker'] = ''
             self.cleaned_data['average_price_usd'] = None
             self.cleaned_data['average_price_jpy'] = None
 
