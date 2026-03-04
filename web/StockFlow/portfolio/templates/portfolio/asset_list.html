@@ -83,18 +83,22 @@
                   {% if asset.is_usstock_asset %}
                       (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
                   {% elif asset.is_usbnd_asset %}
-                      (USD){{ asset.average_price_usd|floatformat:2|intcomma}}<br>
+                      (USD){{ asset.quantity|intcomma }}<br>
                       (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
                   {% elif asset.is_usmmf_asset or asset.is_uscash_asset %}
-                      (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
+                      (USD){{ asset.quantity|intcomma }}
+                  {% elif asset.is_jpbnd_asset or asset.asset_class == "JP_CASH" %}
+                      (JPY){{ asset.quantity|floatformat:2|intcomma }}
                   {% else %}
                       (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
                   {% endif %}
               </td>
               <!-- 現在価格 -->
               <td>
-                  {% if asset.is_foreign_asset %}
+                  {% if asset.is_usstock_asset or asset.is_usbnd_asset %}
                       (USD){{ asset.current_price_usd|floatformat:2|intcomma}}
+                  {% elif asset.is_jpbnd_asset or asset.asset_class == "JP_CASH" %}
+                      (JPY){{ asset.quantity|floatformat:2|intcomma }}
                   {% else %}
                       (JPY){{ asset.current_price_jpy|floatformat:2|intcomma}}
                   {% endif %}
