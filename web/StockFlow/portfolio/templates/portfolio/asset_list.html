@@ -61,79 +61,98 @@
     {% endif %}
    
     <div class="container mx-4 my-2">
-      <table class="table table-striped table-hover table-bordered align-middle">
-        <thead>
-          <tr>
-              <th>名前</th><th>Ticker</th><th>資産クラス</th><th>所有者</th><th>金融機関</th><th>口座種別</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額</th><th>損益</th><th>割合(%)</th>
+      {% for class_label, class_data in grouped_assets.items %}
+        <h2 class="mt-4">{{ class_label }}</h2>
+        <table class="table table-striped table-hover table-bordered align-middle mb-4">
+          <thead>
+            <tr>
+                <th>名前</th><th>Ticker</th><th>資産クラス</th><th>所有者</th><th>金融機関</th><th>口座種別</th><th>数量</th><th>平均買値</th><th>現在価格</th><th>評価額</th><th>損益</th><th>割合(%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for asset in class_data.assets %}
+            <tr>
+              <td>{{ asset.name }}</td>
+              <td>{{ asset.ticker }}</td>
+              <td>{{ asset.get_asset_class_display }}</td>
+              <td>{{ asset.owner }}</td>
+              <td>{{ asset.financial_institution }}</td>
+              <td>{{ asset.get_account_type_display }}</td>
+              <td>{{ asset.quantity|intcomma }}</td>
+              <!-- 平均買値 -->
+              <td>
+                  {% if asset.is_usstock_asset %}
+                      (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
+                  {% elif asset.is_usbnd_asset %}
+                      (USD){{ asset.average_price_usd|floatformat:2|intcomma}}<br>
+                      (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
+                  {% elif asset.is_usmmf_asset or asset.is_uscash_asset %}
+                      (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
+                  {% else %}
+                      (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
+                  {% endif %}
+              </td>
+              <!-- 現在価格 -->
+              <td>
+                  {% if asset.is_foreign_asset %}
+                      (USD){{ asset.current_price_usd|floatformat:2|intcomma}}
+                  {% else %}
+                      (JPY){{ asset.current_price_jpy|floatformat:2|intcomma}}
+                  {% endif %}
+              </td>
+              <!-- 評価額 -->
+              <td>
+                  {% if asset.is_foreign_asset %}
+                      (USD) {{ asset.valuation_usd|floatformat:2|intcomma }}<br>
+                  {% endif %}
+                  (JPY) {{ asset.valuation_jpy|floatformat:2|intcomma }}
+              </td>
+              <!-- 損益 -->
+              <td>
+                  {% if asset.profit_jpy >= 0 %}
+                      <span style="color:green;">
+                          {% if asset.is_foreign_asset %}
+                              (USD) {{ asset.profit_usd|floatformat:2|intcomma}}<br>
+                          {% endif %}
+                          (JPY) {{ asset.profit_jpy|floatformat:2|intcomma}}
+                      </span>
+                  {% else %}
+                      <span style="color:red;">
+                          {% if asset.is_foreign_asset %}
+                              (USD) {{ asset.profit_usd|floatformat:0|intcomma}}<br>
+                          {% endif %}
+                          (JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}
+                      </span>
+                  {% endif %}
+              </td>
+              <td>{{ asset.ratio|floatformat:2}}</td>
+              <td>
+                <a href="{% url 'asset_edit' asset.pk %}">編集</a>
+                <a href="#" onclick="deleteAsset({{ asset.pk }}); return false;">削除</a>
+                <form id="delete-form-{{ asset.pk }}" action="{% url 'asset_delete' asset.pk %}" method="post" style="display:none;">
+                   {% csrf_token %}
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <!-- 資産クラスごとの合計 -->
+        <tfoot>
+          <tr style="background-color: #f5f5f5; font-weight: bold;">
+            <td colspan="9">{{ class_label }}の合計</td>
+            <td>(JPY) {{ class_data.valuation_jpy|floatformat:0|intcomma }}</td>
+            <td>
+              {% if class_data.profit_jpy >= 0 %}
+                  <span style="color:green;">(JPY) {{ class_data.profit_jpy|floatformat:0|intcomma }}</span>
+              {% else %}
+                  <span style="color:red;">(JPY) {{ class_data.profit_jpy|floatformat:0|intcomma }}</span>
+              {% endif %}
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {% for asset in assets %}
-          <tr>
-            <td>{{ asset.name }}</td>
-            <td>{{ asset.ticker }}</td>
-            <td>{{ asset.get_asset_class_display }}</td>
-            <td>{{ asset.owner }}</td>
-            <td>{{ asset.financial_institution }}</td>
-            <td>{{ asset.get_account_type_display }}</td>
-            <td>{{ asset.quantity|intcomma }}</td>
-            <!-- 平均買値 -->
-            <td>
-                {% if asset.is_usstock_asset %}
-                    (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
-                {% elif asset.is_usbnd_asset %}
-                    (USD){{ asset.average_price_usd|floatformat:2|intcomma}}<br>
-                    (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
-                {% elif asset.is_usmmf_asset or asset.is_uscash_asset %}
-                    (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
-                {% else %}
-                    (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
-                {% endif %}
-            </td>
-            <!-- 現在価格 -->
-            <td>
-                {% if asset.is_usstock_asset or asset.is_usbnd_asset %}
-                    (USD){{ asset.current_price_usd|floatformat:2|intcomma}}
-                {% else %}
-                    (JPY){{ asset.current_price_jpy|floatformat:2|intcomma}}
-                {% endif %}
-            </td>
-            <!-- 評価額 -->
-            <td>
-                {% if asset.is_foreign_asset %}
-                    (USD) {{ asset.valuation_usd|floatformat:2|intcomma }}<br>
-                {% endif %}
-                (JPY) {{ asset.valuation_jpy|floatformat:2|intcomma }}
-            </td>
-            <!-- 損益 -->
-            <td>
-                {% if asset.profit_jpy >= 0 %}
-                    <span style="color:green;">
-                        {% if asset.is_foreign_asset %}
-                            (USD) {{ asset.profit_usd|floatformat:2|intcomma}}<br>
-                        {% endif %}
-                        (JPY) {{ asset.profit_jpy|floatformat:2|intcomma}}
-                    </span>
-                {% else %}
-                    <span style="color:red;">
-                        {% if asset.is_foreign_asset %}
-                            (USD) {{ asset.profit_usd|floatformat:0|intcomma}}<br>
-                        {% endif %}
-                        (JPY) {{ asset.profit_jpy|floatformat:0|intcomma}}
-                    </span>
-                {% endif %}
-            </td>
-            <td>{{ asset.ratio|floatformat:2}}</td>
-            <td>
-              <a href="{% url 'asset_edit' asset.pk %}">編集</a>
-              <a href="#" onclick="deleteAsset({{ asset.pk }}); return false;">削除</a>
-              <form id="delete-form-{{ asset.pk }}" action="{% url 'asset_delete' asset.pk %}" method="post" style="display:none;">
-                 {% csrf_token %}
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
+        </tfoot>
+      {% endfor %}
+      <table class="table">
         <tfoot>
           <tr>
             <th colspan="9">合計</th>

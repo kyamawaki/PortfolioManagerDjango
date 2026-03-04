@@ -48,12 +48,29 @@ def asset_list(request):
 
     exchange_rate = assets[0].exchange_rate if assets else None
 
-    return render(request, 'portfolio/asset_list.html', {'assets': assets,
-                                                           'last_updated': last_updated,
-                                                           'total_valuation_jpy': total_valuation_jpy,
-                                                           'total_profit_jpy': total_profit_jpy,
-                                                           'exchange_rate': exchange_rate,
-                  })
+    # group by asset class preserving defined order
+    from collections import OrderedDict
+    grouped_assets = OrderedDict()
+    
+    for code, label in Asset.ASSET_CLASS_CHOICES:
+        group = assets.filter(asset_class=code)
+        if group.exists():
+            # 資産クラスごとの合計評価額と損益を計算
+            class_valuation = sum(asset.valuation_jpy or 0 for asset in group)
+            class_profit = sum(asset.profit_jpy or 0 for asset in group)
+            grouped_assets[label] = {
+                'assets': group,
+                'valuation_jpy': class_valuation,
+                'profit_jpy': class_profit,
+            }
+
+    return render(request, 'portfolio/asset_list.html', {
+        'grouped_assets': grouped_assets,
+        'last_updated': last_updated,
+        'total_valuation_jpy': total_valuation_jpy,
+        'total_profit_jpy': total_profit_jpy,
+        'exchange_rate': exchange_rate,
+    })
 
 #################################
 # Add asset
