@@ -8,57 +8,64 @@ class AssetForm(forms.ModelForm):
         model = Asset
         fields = ["name", "asset_class", "owner", "financial_institution", "account_type", "ticker", "quantity", "average_price_usd", "average_price_jpy"]
 
+    # インスタンス初期化
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # 初期値やインスタンスのasset_classが国内債券なら平均買値フィールドを隠す
-        asset_class = None
-        if 'asset_class' in self.initial:
-            asset_class = self.initial['asset_class']
-        if self.instance and getattr(self.instance, 'asset_class', None):
-            asset_class = self.instance.asset_class
-
-        if asset_class == 'JP_BND':
-            # 国内債券の場合はtickerにJGBをセットしておく
-            self.initial.setdefault('ticker', 'JGB')
-            for fld in ('ticker', 'average_price_usd', 'average_price_jpy'):
-                # 非表示にしてrequiredを外す
-                self.fields[fld].widget = forms.HiddenInput()
-                self.fields[fld].required = False
-        elif asset_class == 'US_MMF':
-            # MMFは平均買値をJPYで入力させる、USDフィールドは不要
-            self.fields['average_price_usd'].widget = forms.HiddenInput()
-            self.fields['average_price_usd'].required = False
-        elif asset_class == 'US_CASH':
-            # 現金はtickerや価格フィールド不要
-            for fld in ('ticker', 'average_price_usd', 'average_price_jpy'):
-                self.fields[fld].widget = forms.HiddenInput()
-                self.fields[fld].required = False
 
     # フィールドの検証
     def clean(self):
         asset_class = self.cleaned_data.get('asset_class')
         ticker = self.cleaned_data.get('ticker')
 
-        # 存在チェック
-        if asset_class == 'JP_STOCK':
+        # Ticker存在チェック
+        if asset_class == "US_STOCK":
+            self.validate_us_stock(ticker)
+        elif asset_class == 'JP_STOCK':
             self.validate_jp_stock(ticker)
         elif asset_class == "JP_FUND":
             self.validate_jp_fund(ticker)
-        elif asset_class == "US_STOCK":
-            self.validate_us_stock(ticker)
-        # 国内債券はtickerをJGBにし、平均買値を入力させない
-        if asset_class == 'JP_BND':
-            self.cleaned_data['ticker'] = 'JGB'
+
+        # アセットに応じたフィールド値の設定
+        if asset_class == 'US_STOCK':
+            self.cleaned_data['average_price_jpy'] = None
+        elif asset_class == 'US_BND':
+            self.cleaned_data['ticker'] = 'US_BND'
+            self.cleaned_data['account_type'] = None
+            self.cleaned_data['average_price_jpy'] = None
+        elif asset_class == 'US_MMF':
+            self.cleaned_data['ticker'] = 'US_BND'
+            self.cleaned_data['account_type'] = None
             self.cleaned_data['average_price_usd'] = None
             self.cleaned_data['average_price_jpy'] = None
-        # MMFは平均買値をJPYのみ保持
-        if asset_class == 'US_MMF':
-            self.cleaned_data['average_price_usd'] = None
-        # 現金は価格やticker不要
-        if asset_class == 'US_CASH':
-            self.cleaned_data['ticker'] = ''
+        elif asset_class == 'US_CASH':
+            self.cleaned_data['ticker'] = 'US_BND'
+            self.cleaned_data['account_type'] = None
             self.cleaned_data['average_price_usd'] = None
             self.cleaned_data['average_price_jpy'] = None
+        elif asset_class == 'JP_STOCK':
+            self.cleaned_data['average_price_usd'] = None
+        elif asset_class == 'JP_FUND':
+            self.cleaned_data['average_price_usd'] = None
+        elif asset_class == 'JP_BND':
+            self.cleaned_data['ticker'] = 'JP_BND'
+            self.cleaned_data['account_type'] = None
+            self.cleaned_data['average_price_usd'] = None
+            self.cleaned_data['average_price_jpy'] = None
+        elif asset_class == 'JP_CASH':
+            self.cleaned_data['ticker'] = 'JP_CASH'
+            self.cleaned_data['account_type'] = None
+            self.cleaned_data['average_price_usd'] = None
+            self.cleaned_data['average_price_jpy'] = None
+
+    # ticker確認
+    def validate_us_stock(self, ticker):
+        try:
+            data = yf.Ticker(ticker).history(period="1d")
+        except Exception:
+            raise forms.ValidationError("ティッカー確認中にエラーが発生しました。時間をおいて確認してください")
+
+        if data.empty:
+            raise forms.ValidationError("このティッカーは存在しません")
 
     # 証券コード検証
     def validate_jp_stock(self, ticker):
@@ -70,12 +77,3 @@ class AssetForm(forms.ModelForm):
         if not re.match(r'^[a-z0-9]{8,10}$', ticker, re.IGNORECASE):
             raise forms.ValidationError("投信協会コードは8〜10桁以内の英数字です")
 
-    # ticker確認
-    def validate_us_stock(self, ticker):
-        try:
-            data = yf.Ticker(ticker).history(period="1d")
-        except Exception:
-            raise forms.ValidationError("ティッカー確認中にエラーが発生しました。時間をおいて確認してください")
-
-        if data.empty:
-            raise forms.ValidationError("このティッカーは存在しません")
