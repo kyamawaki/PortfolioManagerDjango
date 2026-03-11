@@ -52,34 +52,6 @@ class Asset(models.Model):
         blank=True,
     )
 
-    # 資産クラスごとの必須入力と固定ticker定義
-    REQUIRED_FIELDS_BY_CLASS = {
-        'US_STOCK': ['ticker', 'average_price_usd'],
-        'US_BND'  : ['ticker', 'average_price_jpy'],
-        'US_MMF'  : ['average_price_jpy'],
-        'US_CASH' : [],
-        'JP_STOCK': ['ticker', 'average_price_jpy'],
-        'JP_FUND' : ['ticker', 'average_price_jpy'],
-        'JP_BND'  : [],
-        'JP_CASH' : [],
-    }
-
-    FIXED_TICKER = {
-        'US_BND' : 'US_BND',
-        'US_MMF' : 'US_MMF',
-        'US_CASH': 'US_CASH',
-        'JP_BND' : 'JP_BND',
-        'JP_CASH': 'JP_CASH',
-    }
-
-    @classmethod
-    def required_fields(cls, asset_class):
-        return cls.REQUIRED_FIELDS_BY_CLASS.get(asset_class, [])
-
-    @classmethod
-    def fixed_ticker(cls, asset_class):
-        return cls.FIXED_TICKER.get(asset_class)
-
     # 海外資産判定
     @property
     def is_foreign_asset(self):
@@ -229,4 +201,21 @@ class Asset(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.ticker})"
+    
+    # 保存時の処理
+    def save(self, *args, **kwargs):
+        FIXED_TICKERS = {
+            'US_BND' : 'US_BND',
+            'US_MMF' : 'US_MMF',
+            'US_CASH': 'US_CASH',
+            'JP_BND' : 'JP_BND',
+            'JP_CASH': 'JP_CASH',
+        }
+
+        if self.asset_class in FIXED_TICKERS:
+            self.ticker = FIXED_TICKERS[self.asset_class]
+
+        #print(f"asset_class={self.asset_class}, ticker={self.ticker}")
+        super().save(*args, **kwargs)
+
 
