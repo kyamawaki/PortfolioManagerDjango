@@ -32,15 +32,6 @@ const HIDE_FIELDS = {
   'JP_CASH' : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy'],
 };
 
-// モデルで定義した固定ticker情報
-const FIXED_TICKER = {
-  'US_BND' : 'US_BND',
-  'US_MMF' : 'US_MMF',
-  'US_CASH': 'US_CASH',
-  'JP_BND' : 'JP_BND',
-  'JP_CASH': 'JP_CASH',
-};
-
 // アセットクラス変更時の処理
 function toggleFieldsByAssetClass() {
   var sel = document.getElementById('id_asset_class');
@@ -48,7 +39,6 @@ function toggleFieldsByAssetClass() {
   
   var assetClass = sel.value;
   var hideFields = HIDE_FIELDS[assetClass] || [];
-  var fixedTicker = FIXED_TICKER[assetClass];
   
   // 対象フィールドすべて
   var allFields = ["name", "asset_class", "owner", "financial_institution", "account_type", "ticker", "quantity", "average_price_usd", "average_price_jpy"]
@@ -61,17 +51,6 @@ function toggleFieldsByAssetClass() {
       elem.closest('p').style.display = shouldHide ? 'None' : '';
     }
   });
-  
-  // 固定tickerがあれば設定して非表示に
-  if (fixedTicker) {
-    var ticker = document.getElementById('id_ticker');
-    if (ticker) {
-      ticker.value = fixedTicker;
-      if (ticker.closest('p')) {
-        ticker.closest('p').style.display = 'none';
-      }
-    }
-  }
 }
 
 // イベントリスナーの追加

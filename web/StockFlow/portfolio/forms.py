@@ -29,16 +29,13 @@ class AssetForm(forms.ModelForm):
         if asset_class == 'US_STOCK':
             self.cleaned_data['average_price_jpy'] = None
         elif asset_class == 'US_BND':
-            self.cleaned_data['ticker'] = 'US_BND'
             self.cleaned_data['account_type'] = None
             self.cleaned_data['average_price_jpy'] = None
         elif asset_class == 'US_MMF':
-            self.cleaned_data['ticker'] = 'US_BND'
             self.cleaned_data['account_type'] = None
             self.cleaned_data['average_price_usd'] = None
             self.cleaned_data['average_price_jpy'] = None
         elif asset_class == 'US_CASH':
-            self.cleaned_data['ticker'] = 'US_BND'
             self.cleaned_data['account_type'] = None
             self.cleaned_data['average_price_usd'] = None
             self.cleaned_data['average_price_jpy'] = None
@@ -47,12 +44,10 @@ class AssetForm(forms.ModelForm):
         elif asset_class == 'JP_FUND':
             self.cleaned_data['average_price_usd'] = None
         elif asset_class == 'JP_BND':
-            self.cleaned_data['ticker'] = 'JP_BND'
             self.cleaned_data['account_type'] = None
             self.cleaned_data['average_price_usd'] = None
             self.cleaned_data['average_price_jpy'] = None
         elif asset_class == 'JP_CASH':
-            self.cleaned_data['ticker'] = 'JP_CASH'
             self.cleaned_data['account_type'] = None
             self.cleaned_data['average_price_usd'] = None
             self.cleaned_data['average_price_jpy'] = None
