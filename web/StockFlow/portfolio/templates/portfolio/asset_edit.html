@@ -7,6 +7,12 @@ fields = ["name", "asset_class", "owner", "financial_institution",
  -->
 <form method="post">
   {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
   <p>{{ form.name.label_tag }} {{ form.name }}</p>
   <p>{{ form.asset_class.label_tag }} {{ form.asset_class }}</p>
   <p>{{ form.owner.label_tag }} {{ form.owner }}</p>
