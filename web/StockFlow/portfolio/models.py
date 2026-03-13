@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from decimal import Decimal
 
 ################################################
@@ -6,16 +7,7 @@ from decimal import Decimal
 ################################################
 class Asset(models.Model):
 
-    name = models.CharField("名前", max_length=100, unique=True)
-    ticker = models.CharField("Ticker", max_length=10)
-    quantity = models.DecimalField("数量", max_digits=10, decimal_places=2, default=0)
-    average_price_usd = models.DecimalField("平均買値（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
-    average_price_jpy = models.DecimalField("平均買値（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
-    current_price_usd = models.DecimalField("現在価格（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
-    current_price_jpy = models.DecimalField("現在価格（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
-    exchange_rate = models.DecimalField("為替レート", max_digits=6, decimal_places=2, default=150.00)
-    last_updated = models.DateField(null=True, blank=True)
-
+    name = models.CharField("名前", max_length=100)
     # 資産クラス
     ASSET_CLASS_CHOICES = [
         ('US_STOCK', '外国株'),
@@ -32,14 +24,8 @@ class Asset(models.Model):
         choices=ASSET_CLASS_CHOICES,
         default='JP_FUND',
     )
-
-    # 所有者
     owner = models.CharField("所有者", max_length=100, null=True, blank=True)
-
-    # 金融機関名
     financial_institution = models.CharField("金融機関名", max_length=100, null=True, blank=True)
-
-    # 口座種別
     ACCOUNT_TYPE_CHOICES = [
         ('TAXABLE', '特定'),
         ('NISA', 'NISA'),
@@ -51,6 +37,29 @@ class Asset(models.Model):
         null=True,
         blank=True,
     )
+    ticker = models.CharField("Ticker", max_length=10, null=True, blank=True)
+    quantity = models.DecimalField("数量", max_digits=10, decimal_places=2, default=0)
+    average_price_usd = models.DecimalField("平均買値（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
+    average_price_jpy = models.DecimalField("平均買値（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
+    current_price_usd = models.DecimalField("現在価格（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
+    current_price_jpy = models.DecimalField("現在価格（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
+    exchange_rate = models.DecimalField("為替レート", max_digits=6, decimal_places=2, default=150.00)
+    last_updated = models.DateField(null=True, blank=True)
+
+    # ユニーク判定属性
+    constraints = [
+        models.UniqueConstraint(
+            fields = [
+                'name',
+                'owner',
+                'financial_institution',
+                'account_type',
+                'ticker',
+            ],
+            name = 'unique_asset_combination'
+        )
+    ]
+
 
     # 海外資産判定
     @property
@@ -202,20 +211,3 @@ class Asset(models.Model):
     def __str__(self):
         return f"{self.name} ({self.ticker})"
     
-    # 保存時の処理
-    def save(self, *args, **kwargs):
-        FIXED_TICKERS = {
-            'US_BND' : 'US_BND',
-            'US_MMF' : 'US_MMF',
-            'US_CASH': 'US_CASH',
-            'JP_BND' : 'JP_BND',
-            'JP_CASH': 'JP_CASH',
-        }
-
-        if self.asset_class in FIXED_TICKERS:
-            self.ticker = FIXED_TICKERS[self.asset_class]
-
-        #print(f"asset_class={self.asset_class}, ticker={self.ticker}")
-        super().save(*args, **kwargs)
-
-

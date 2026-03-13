@@ -2,6 +2,11 @@
 
 <form method="post">
   {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
   <p>{{ form.name.label_tag }} {{ form.name }}</p>
   <p>{{ form.asset_class.label_tag }} {{ form.asset_class }}</p>
   <p>{{ form.owner.label_tag }} {{ form.owner }}</p>
@@ -11,7 +16,7 @@
   <p>{{ form.quantity.label_tag }} {{ form.quantity }}</p>
   <p>{{ form.average_price_usd.label_tag }} {{ form.average_price_usd }}</p>
   <p>{{ form.average_price_jpy.label_tag }} {{ form.average_price_jpy }}</p>
-  <button type="submit" name=""save">保存</button>
+  <button type="submit" name="save">保存</button>
   <button type="submit" name="add_another">保存して続けて追加</button>
 </form>
 
@@ -28,26 +33,16 @@ const HIDE_FIELDS = {
   'JP_CASH' : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy'],
 };
 
-// モデルで定義した固定ticker情報
-const FIXED_TICKER = {
-  'US_BND' : 'US_BND',
-  'US_MMF' : 'US_MMF',
-  'US_CASH': 'US_CASH',
-  'JP_BND' : 'JP_BND',
-  'JP_CASH': 'JP_CASH',
-};
-
 // アセットクラス変更時の処理
 function toggleFieldsByAssetClass() {
-  console.log("come")
+  //console.log("come")
   var sel = document.getElementById('id_asset_class');
   if (!sel) return;
 
-  console.log(sel.value)
+  //console.log(sel.value)
   
   var assetClass = sel.value;
   var hideFields = HIDE_FIELDS[assetClass] || [];
-  var fixedTicker = FIXED_TICKER[assetClass];
   
   // 対象フィールドすべて
   var allFields = ["name", "asset_class", "owner", "financial_institution", "account_type", "ticker", "quantity", "average_price_usd", "average_price_jpy"]
@@ -57,20 +52,17 @@ function toggleFieldsByAssetClass() {
     var elem = document.getElementById('id_' + field);
     if (elem && elem.closest('p')) {
       var shouldHide = hideFields.includes(field);
-      elem.closest('p').style.display = shouldHide ? 'None' : '';
-    }
-  });
-  
-  // 固定tickerがあれば設定して非表示に
-  if (fixedTicker) {
-    var ticker = document.getElementById('id_ticker');
-    if (ticker) {
-      ticker.value = fixedTicker;
-      if (ticker.closest('p')) {
-        ticker.closest('p').style.display = 'none';
+      if (shouldHide) {
+        elem.closest('p').style.display = 'None';
+        elem.readOnly = true;
+      }
+      else {
+        elem.closest('p').style.display = '';
+        elem.readOnly = false;
       }
     }
-  }
+  });
+  //console.log("end")
 }
 
 // イベントリスナーの追加
@@ -80,7 +72,13 @@ document.addEventListener('DOMContentLoaded', function() {
     sel.addEventListener('change', toggleFieldsByAssetClass);
     toggleFieldsByAssetClass();
   }
+
+  <!--
+  const nameField = document.getElementById('id_name');
+  if (nameField) nameField.focus();
+  -->
 });
+
 </script>
 
 <a href="{% url 'asset_list' %}">戻る</a>

@@ -76,6 +76,7 @@ def asset_list(request):
 # Add asset
 #################################
 def asset_create(request):
+    print("view create")
     if request.method == 'POST':
         form = AssetForm(request.POST)
         if form.is_valid():
@@ -134,7 +135,7 @@ def asset_update(request):
             asset.exchange_rate = Decimal('1.0')
 
         price = fetch_latest_price(asset)
-        print(f"=== {price} ===")
+        #print(f"=== {price} ===")
         if price:
             if asset.is_usstock_asset or asset.is_usbnd_asset:
                 asset.current_price_usd = Decimal(str(price))
