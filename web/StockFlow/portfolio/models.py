@@ -41,6 +41,7 @@ class Asset(models.Model):
     quantity = models.DecimalField("数量", max_digits=10, decimal_places=2, default=0)
     average_price_usd = models.DecimalField("平均買値（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
     average_price_jpy = models.DecimalField("平均買値（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
+    average_exchange_rate = models.DecimalField("取得時平均為替レート", max_digits=6, decimal_places=2, default=150.00)
     current_price_usd = models.DecimalField("現在価格（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
     current_price_jpy = models.DecimalField("現在価格（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
     exchange_rate = models.DecimalField("為替レート", max_digits=6, decimal_places=2, default=150.00)
@@ -176,15 +177,15 @@ class Asset(models.Model):
         # 米国株(USD損益×為替レート)
         if self.is_usstock_asset:
             return self.profit_usd * self.exchange_rate
-        # ドル建て債権(JPY評価額－JPY買値)
+        # ドル建て債権（現在の為替レート-取得時の為替レート)
         elif self.is_usbnd_asset:
-            if self.valuation_jpy and self.average_price_jpy:
-                return self.valuation_jpy - self.average_price_jpy
-        # 外貨建てMMFは（為替レートの差x数値）
+            print(self.average_exchange_rate)
+            if self.exchange_rate and self.average_exchange_rate:
+                return (self.exchange_rate - self.average_exchange_rate) * self.quantity
+        # ドル建て債権（現在の為替レート-取得時の為替レート)
         elif self.is_usmmf_asset:
-            if self.average_price_jpy and self.exchange_rate:
-                profit = (self.exchange_rate - self.average_price_jpy) * self.quantity
-                return profit
+            if self.valuation_jpy and self.average_price_jpy:
+                return (self.exchange_rate - self.average_price_jpy) * self.quantity
         # 外貨現金は買値がわからないので損益はなし
         elif self.is_uscash_asset:
             return Decimal('0')
