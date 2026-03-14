@@ -76,7 +76,6 @@ def asset_list(request):
 # Add asset
 #################################
 def asset_create(request):
-    print("view create")
     if request.method == 'POST':
         form = AssetForm(request.POST)
         if form.is_valid():
