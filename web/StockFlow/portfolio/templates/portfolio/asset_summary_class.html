@@ -1,0 +1,60 @@
+<h2>資産クラスの割合</h2>
+
+<style>
+  .chart-container {
+    width: 90%;          /* 画面幅の90%を使う */
+    height: 90%;         /* 画面高さの90%を使う */
+    margin: 0 auto;      /* 中央寄せ */
+  }
+
+  #pieChart {
+    width: 100%;         /* 親要素に合わせて伸縮 */
+    height: auto;        /* アスペクト比維持 */
+  }
+</style>
+
+<div class="chart-container">
+  <canvas id="pieChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<script>
+  const ctx = document.getElementById('pieChart');
+  const labels = {{ labels|safe }};
+  const values = {{ values|safe }};
+  const total = values.reduce((a, b) => a + b, 0);
+
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: {{ labels|safe }},
+      datasets: [{
+        data: {{ values|safe }},
+        backgroundColor: [
+          '#4e79a7', '#f28e2b', '#e15759',
+          '#76b7b2', '#59a14f', '#edc948',
+          '#b07aa1', '#ff9da7'
+        ],
+      }]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        datalabels: {
+          color: '#fff',
+          font: { size: 12 },
+          formatter: (value, ctx) => {
+            const label = ctx.chart.data.labels[ctx.dataIndex];
+            const percent = (value / total * 100).toFixed(1);
+            return `${label}\n${value.toLocaleString()}円\n(${percent}%)`;
+          }
+        }
+      }
+    }
+  });
+</script>
