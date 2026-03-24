@@ -28,8 +28,8 @@ def asset_summary_class(request):
     LABEL_MAP = {
         'US_STOCK': '外国株',
         'US_BND':   '外国債券',
-        'US_MMF':   'ドルMMF',
-        'US_CASH':  'ドル現金',
+        'US_MMF':   '外貨建てMMF',
+        'US_CASH':  '外貨建て現金',
         'JP_STOCK': '日本株',
         'JP_FUND':  '投資信託',
         'JP_BND':   '国内債券',
@@ -37,8 +37,8 @@ def asset_summary_class(request):
     }
 
     # Chart.js用データ
-    labels = [LABEL_MAP[k] for k in totals.keys()]
-    values = list(totals.values())
+    labels = [LABEL_MAP[k] for k in ORDER]
+    values = [totals[k] for k in ORDER]
     context = {
         'labels': labels,
         'values': values,
