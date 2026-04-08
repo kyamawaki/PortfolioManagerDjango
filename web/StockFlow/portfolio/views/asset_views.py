@@ -79,7 +79,17 @@ def asset_create(request):
     if request.method == 'POST':
         form = AssetForm(request.POST)
         if form.is_valid():
-            form.save()
+            asset = form.save()
+
+            # 前回入力値をセッションに保存
+            request.session["last_asset_input"] = {
+                "name": asset.name,
+                "ticker": asset.ticker,
+                "owner": asset.owner,
+                "financial_institution": asset.financial_institution,
+                "account_type": asset.account_type,
+                "asset_class": asset.asset_class,
+            }
 
             # 連続追加
             if "add_another" in request.POST:
@@ -88,7 +98,8 @@ def asset_create(request):
             # 保存⇒一覧へ
             return redirect('asset_list')
     else:
-        form = AssetForm()
+        initial = request.session.get("last_asset_input", {})
+        form = AssetForm(initial=initial)
 
     return render(request, 'portfolio/asset_create.html', {'form': form})
 
