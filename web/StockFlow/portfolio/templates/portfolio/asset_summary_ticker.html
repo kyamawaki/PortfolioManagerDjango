@@ -32,7 +32,7 @@
             <tbody>
                 {% for ticker, data in grouped.items %}
                 <tr>
-                    <td>{{ ticker }}</td>
+                    <td>{{ data.name }}</td>
                     <td>{{ data.value|floatformat:0|intcomma }}</td>
                     <td>{{ data.ratio|floatformat:2 }}%</td>
                 </tr>
