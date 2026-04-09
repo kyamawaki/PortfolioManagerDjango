@@ -8,6 +8,9 @@ class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
         fields = ["name", "asset_class", "owner", "financial_institution", "account_type", "ticker", "quantity", "average_price_usd", "average_price_jpy", "average_exchange_rate"]
+        widgets = {
+            "name": forms.TextInput(attrs={"size":50}),
+        }
 
     # インスタンス初期化
     def __init__(self, *args, **kwargs):

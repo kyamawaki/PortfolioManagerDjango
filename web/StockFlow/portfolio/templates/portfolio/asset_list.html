@@ -79,7 +79,7 @@
               <td>{% if asset.owner %}{{ asset.owner }}{% endif %}</td>
               <td>{% if asset.financial_institution %}{{ asset.financial_institution }}{% endif %}</td>
               <td>{% if asset.get_account_type_display %}{{ asset.get_account_type_display }}{% endif %}</td>
-              <td>{{ asset.quantity|intcomma }}</td>
+              <td>{{ asset.quantity|floatformat:0|intcomma }}</td>
               <!-- 平均買値 -->
               <td>
                   {% if asset.is_usstock_asset %}
