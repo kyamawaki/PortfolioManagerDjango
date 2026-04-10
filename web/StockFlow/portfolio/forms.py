@@ -64,11 +64,13 @@ class AssetForm(forms.ModelForm):
             financial_institution = cleaned.get('financial_institution')
             account_type = cleaned.get('account_type')
 
+            '''
             print(f"name={name}, \
                 owner={owner}, \
                 financial_institution={financial_institution}, \
                 account_type={account_type},\
                 ticker={ticker}")
+            '''
     
             if Asset.objects.filter(
                 name=name,

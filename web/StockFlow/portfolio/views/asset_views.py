@@ -64,6 +64,7 @@ def asset_list(request):
                 'profit_jpy': class_profit,
             }
 
+    # print(grouped_assets)
     return render(request, 'portfolio/asset_list.html', {
         'grouped_assets': grouped_assets,
         'last_updated': last_updated,

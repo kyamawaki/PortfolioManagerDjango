@@ -11,7 +11,7 @@ class Asset(models.Model):
     # 資産クラス
     ASSET_CLASS_CHOICES = [
         ('US_STOCK', '外国株'),
-        ('US_BND', '外国債権'),
+        ('US_BND', '外国債券'),
         ('US_MMF', 'ドル建てMMF'),
         ('US_CASH', 'ドル建て現金'),
         ('JP_STOCK', '日本株'),
@@ -116,6 +116,7 @@ class Asset(models.Model):
             return self.current_price_usd
         # 外貨建てMMF/外貨のUSD評価は数量そのもの（単位: USD）
         elif self.is_usmmf_asset or self.is_uscash_asset:
+            print(f"{self.name}, {self.quantity}")
             return self.quantity
         return Decimal('0')
     
@@ -177,15 +178,14 @@ class Asset(models.Model):
         # 米国株(USD損益×為替レート)
         if self.is_usstock_asset:
             return self.profit_usd * self.exchange_rate
-        # ドル建て債権（現在の為替レート-取得時の為替レート)
+        # ドル建て債権（現在の為替レート - 取得時の為替レート)
         elif self.is_usbnd_asset:
-            print(self.average_exchange_rate)
             if self.exchange_rate and self.average_exchange_rate:
                 return (self.exchange_rate - self.average_exchange_rate) * self.quantity
-        # ドル建て債権（現在の為替レート-取得時の為替レート)
+        # ドル建てMMF（現在の為替レート - 取得為替レート）
         elif self.is_usmmf_asset:
-            if self.valuation_jpy and self.average_price_jpy:
-                return (self.exchange_rate - self.average_price_jpy) * self.quantity
+            if self.exchange_rate and self.average_exchange_rate:
+                return (self.exchange_rate - self.average_exchange_rate) * self.quantity
         # 外貨現金は買値がわからないので損益はなし
         elif self.is_uscash_asset:
             return Decimal('0')
