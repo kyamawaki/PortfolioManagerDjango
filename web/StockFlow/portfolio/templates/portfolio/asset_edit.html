@@ -32,10 +32,10 @@ const HIDE_FIELDS = {
   'US_STOCK': ['average_price_jpy', "average_exchange_rate"],
   'US_BND'  : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy'],
   'US_MMF'  : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy'],
-  'US_CASH' : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy'],
+  'US_CASH' : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy', 'average_exchange_rate'],
   'JP_STOCK': ['average_price_usd'],
   'JP_FUND' : ['average_price_usd'],
-  'JP_BND'  : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy', "average_exchange_rate"],
+  'JP_BND'  : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy', 'average_exchange_rate'],
   'JP_CASH' : ['ticker', 'account_type', 'average_price_usd', 'average_price_jpy'],
 };
 
@@ -58,7 +58,20 @@ function toggleFieldsByAssetClass() {
       elem.closest('p').style.display = shouldHide ? 'None' : '';
     }
   });
-}
+
+  // ラベルを切り替え
+  const assetClassField = document.getElementById('id_asset_class');
+  const quantitylabel = document.querySelector("label[for='id_quantity']")
+  const averageExchangeRatelabel = document.querySelector("label[for='id_average_exchange_rate']")
+  if(assetClassField.value === "US_BND") {
+    quantitylabel.textContent = "保有額面"
+    averageExchangeRatelabel.textContent = "取得為替";
+  } else if (assetClassField.value === "US_MMF") {
+    averageExchangeRatelabel.textContent = "取得為替";
+  } else {
+    quantitylabel.textContent = "数量"
+    averageExchangeRatelabel.textContent = "取得時平均為替レート";
+  }}
 
 // イベントリスナーの追加
 document.addEventListener('DOMContentLoaded', function() {
