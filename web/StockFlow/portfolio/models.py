@@ -39,8 +39,8 @@ class Asset(models.Model):
     )
     ticker = models.CharField("Ticker", max_length=10, null=True, blank=True)
     quantity = models.DecimalField("数量", max_digits=10, decimal_places=2, default=0)
-    average_price_usd = models.DecimalField("平均買値（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
-    average_price_jpy = models.DecimalField("平均買値（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
+    average_price_usd = models.DecimalField("取得単価（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
+    average_price_jpy = models.DecimalField("取得単価（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
     average_exchange_rate = models.DecimalField("取得時平均為替レート", max_digits=6, decimal_places=2, default=150.00)
     current_price_usd = models.DecimalField("現在価格（USD）", max_digits=10, decimal_places=2, null=True, blank=True)
     current_price_jpy = models.DecimalField("現在価格（JPY）", max_digits=10, decimal_places=2, null=True, blank=True)
@@ -102,6 +102,11 @@ class Asset(models.Model):
     @property
     def is_jpbnd_asset(self):
         return self.asset_class in ("JP_BND",)
+
+    # 現金判定
+    @property
+    def is_jpcash_asset(self):
+        return self.asset_class in ("JP_CASH",)
 
     # 評価額（USD）
     @property
