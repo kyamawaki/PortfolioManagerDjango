@@ -82,7 +82,7 @@ def asset_summary_ticker(request):
         key = lambda x: ORDER.index(x[1]["class"])
     )
     new_grouped = dict(sorted_items)
-    print(new_grouped)
+    # print(new_grouped)
 
     # Chart.js用にラベルと値のリストを作る
     #labels = list(new_grouped.keys())

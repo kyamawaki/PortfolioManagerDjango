@@ -69,34 +69,39 @@
           <thead>
             <tr>
                 <th>名前</th>
-                {% if class_label in "外国株" %}
+                {% if class_label == "外国株" %}
                     <th>Ticker</th>
+                {% elif class_label == "日本株" or class_label == "投資信託" %}
+                    <th>証券コード</th>
                 {% endif %}
                 <th>所有者</th>
                 <th>金融機関</th>
-                {% if class_label in "外国株" %}
+                {% if class_label == "外国株" %}
                     <th>口座種別</th>
                 {% endif %}
-                {% if class_label in "外国債券" %}
+                {% if class_label == "外国債券" %}
                     <th>保有額面</th>
                 {% else %}
                     <th>数量</th>
                 {% endif %}
-                <!-- 平均買値/取得為替-->
-                {% if class_label in "外国株" %}
-                    <th>平均買値</th>
-                {% elif class_label in "外国債券, ドル建てMMF" %}
+                <!-- 取得単価/取得為替-->
+                {% if class_label == "外国株" or class_label == "日本株" or class_label == "投資信託" %}
+                    <th>取得単価</th>
+                {% elif class_label == "外国債券" or class_label == "ドル建てMMF" %}
                     <th>取得為替</th>
                 {% endif %}
                 <!-- 現在価格/現在為替-->
-                {% if class_label in "外国債券, ドル建てMMF, ドル建て現金" %}
+                {% if class_label == "外国債券" or class_label == "ドル建てMMF" or class_label == "ドル建て現金" %}
                     <th>現在為替</th>
-                {% elif class_label in "ドル建て現金" %}
+                {% elif class_label == "ドル建て現金" or class_label == "国内債券" or class_label == "現金" %}
                 {% else %}
                     <th>現在価格</th>
                 {% endif %}
                 <th>評価額</th>
-                <th>損益</th>
+                {% if class_label == "ドル建て現金" or class_label == "国内債券" or class_label == "現金" %}
+                {% else %}
+                    <th>損益</th>
+                {% endif %}
                 <th>割合(%)</th>
             </tr>
           </thead>
@@ -106,7 +111,7 @@
               <!-- 名前 -->
               <td>{{ asset.name }}</td>
               <!-- Ticker -->
-              {% if class_label in "外国株" %}
+              {% if class_label == "外国株" or class_label == "日本株" or class_label == "投資信託" %}
                   <td>{{ asset.ticker }}</td>
               {% endif %}
               <!-- 所有者 -->
@@ -114,37 +119,35 @@
               <!-- 金融機関 -->
               <td>{% if asset.financial_institution %}{{ asset.financial_institution }}{% endif %}</td>
               <!-- 口座種別 -->
-              {% if class_label in "外国株" %}
+              {% if class_label == "外国株" %}
                 <td>{% if asset.get_account_type_display %}{{ asset.get_account_type_display }}{% endif %}</td>
               {% endif %}
               <!-- 数量 -->
               <td>{{ asset.quantity|floatformat:2|intcomma }}</td>
               <!-- 平均買値/取得為替 -->
-              {% if not asset.is_uscash_asset %}
+              {% if not asset.is_uscash_asset and not asset.is_jpbnd_asset and not asset.is_jpcash_asset %}
               <td>
                   {% if asset.is_usstock_asset %}
                       (USD){{ asset.average_price_usd|floatformat:2|intcomma}}
                   {% elif asset.is_usbnd_asset or asset.is_usmmf_asset %}
                       (JPY){{ asset.average_exchange_rate|floatformat:2|intcomma}}
-                  {% elif asset.is_jpbnd_asset or asset.asset_class == "JP_CASH" %}
-                      (JPY){{ asset.quantity|floatformat:2|intcomma }}
                   {% else %}
                       (JPY){{ asset.average_price_jpy|floatformat:2|intcomma}}
                   {% endif %}
               </td>
               {% endif %}
               <!-- 現在価格/現在為替 -->
+              {% if not asset.is_jpbnd_asset and not asset.is_jpcash_asset %}
               <td>
                   {% if asset.is_usstock_asset %}
                       (USD){{ asset.current_price_usd|floatformat:2|intcomma}}
                   {% elif asset.is_usbnd_asset or asset.is_usmmf_asset or asset.is_uscash_asset %}
                       (USD){{ asset.exchange_rate|floatformat:2|intcomma}}
-                  {% elif asset.is_jpbnd_asset or asset.asset_class == "JP_CASH" %}
-                      (JPY){{ asset.quantity|floatformat:2|intcomma }}
                   {% else %}
                       (JPY){{ asset.current_price_jpy|floatformat:2|intcomma}}
                   {% endif %}
               </td>
+              {% endif %}
               <!-- 評価額 -->
               <td>
                   {% if asset.is_foreign_asset %}
@@ -153,6 +156,7 @@
                   (JPY) {{ asset.valuation_jpy|floatformat:2|intcomma }}
               </td>
               <!-- 損益 -->
+              {% if not asset.is_jpbnd_asset and not asset.is_jpcash_asset %}
               <td>
                   {% if asset.profit_jpy >= 0 %}
                       <span style="color:green;">
@@ -170,6 +174,8 @@
                       </span>
                   {% endif %}
               </td>
+              {% endif %}
+              <!-- 割合 -->
               <td>{{ asset.ratio|floatformat:2}}</td>
               <td>
                 <a href="{% url 'asset_edit' asset.pk %}">編集</a>

@@ -81,7 +81,7 @@ class AssetForm(forms.ModelForm):
             ).exists():
                 raise ValidationError("同じ資産がすでに登録されています")
 
-        print(cleaned)
+        # print(cleaned)
         return cleaned
 
     # ticker確認
