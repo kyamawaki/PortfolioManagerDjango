@@ -47,9 +47,9 @@
     |
     <a href="{% url 'asset_update' %}" onclick="showLoading()">即時更新</a>
     |
-    <a href="{% url 'asset_summary_ticker' %}"">銘柄別サマリー</a>
+    <a href="{% url 'asset_ticker_summary' %}"">銘柄別サマリー</a>
     |
-    <a href="{% url 'asset_summary_class' %}"">資産クラス別サマリー</a>
+    <a href="{% url 'asset_class_chart' %}"">資産クラスグラフ</a>
 
     {% if last_updated %}
         <p>最終更新日: {{ last_updated|date:"Y-m-d" }}</p>
